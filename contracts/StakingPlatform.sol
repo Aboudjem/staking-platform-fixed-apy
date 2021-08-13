@@ -2,8 +2,9 @@
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract StakingPlatform {
+contract StakingPlatform is Ownable  {
 
     uint public immutable duration;
     uint public immutable totalRewards;
@@ -21,8 +22,8 @@ contract StakingPlatform {
         token = IERC20(_token);
     }
 
-    function startStaking() external {
-        //    only owner and cannot start twice
+    function startStaking() external onlyOwner {
+        require(start == 0, "Staking already started");
         start = block.timestamp;
         end = block.timestamp + duration;
     }
