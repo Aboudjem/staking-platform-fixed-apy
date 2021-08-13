@@ -39,7 +39,7 @@ contract StakingPlatform is Ownable  {
     }
 
     function withdraw() external {
-        require(block.timestamp > end, "Cannot withdraw");
+        require(block.timestamp >= end, "Cannot withdraw");
         require(token.transfer(msg.sender, stakes[msg.sender]));
         totalStaked -= stakes[msg.sender];
         stakes[msg.sender] = 0;
