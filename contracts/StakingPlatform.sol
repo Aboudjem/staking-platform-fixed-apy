@@ -3,23 +3,31 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 
-contract StakingPlatform is Ownable  {
-
-    uint public immutable duration;
-    uint public totalRewards;
+contract StakingPlatform is Ownable {
     IERC20 public token;
+
+    uint8 fixedAPY;
+
     uint public start;
     uint public end;
-    uint8 fixedAPY;
+
+    uint public totalRewards;
+    uint public immutable duration;
     uint totalStaked = 0;
+    uint precision = 1E6;
     uint maxStake = 50_000_000 * 1E18;
 
-    mapping(address => uint) public stakes;
+    mapping(address => uint) public staked;
     mapping(address => uint) public stakeRewards;
+    mapping(address => uint) public claimedRewards;
 
-    constructor(address _token, uint _duration, uint _rewards, uint8 _fixedAPY) {
+    constructor(
+        address _token,
+        uint _duration,
+        uint _rewards,
+        uint8 _fixedAPY
+    ) {
         duration = _duration * 1 days;
         totalRewards = _rewards;
         token = IERC20(_token);
@@ -27,59 +35,67 @@ contract StakingPlatform is Ownable  {
     }
 
     function startStaking() external onlyOwner {
-        require(start == 0, "Staking already started");
+        require(start == 0, "Staking: Staking already started");
         start = block.timestamp;
         end = block.timestamp + duration;
     }
 
-    function amountStaked() external view returns(uint) {
-        return stakes[msg.sender];
-    }
-
     function deposit(uint amount) external {
-        require(totalStaked + amount <= maxStake, "Amount staked exceeds MaxStake");
+        require(
+            end == 0 || end > block.timestamp,
+            "Deposit: Cannot deposit after the end of the period"
+        );
+        require(
+            totalStaked + amount <= maxStake,
+            "Deposit: Amount staked exceeds MaxStake"
+        );
+        stakeRewards[msg.sender] = _calculatedReward();
+        if (stakeRewards[msg.sender] > 0) {
+            claimRewards();
+        }
         require(token.transferFrom(msg.sender, address(this), amount), "Error");
-        stakes[msg.sender] += amount;
+        staked[msg.sender] += amount;
         totalStaked += amount;
     }
 
     function withdraw() external {
-        require(block.timestamp >= end, "Cannot withdraw");
-        require(token.transfer(msg.sender, stakes[msg.sender]));
-        totalStaked -= stakes[msg.sender];
-        stakes[msg.sender] = 0;
+        require(
+            block.timestamp >= end,
+            "Lockup: Cannot withdraw until the end of the period"
+        );
+        token.transfer(msg.sender, staked[msg.sender]);
+        totalStaked -= staked[msg.sender];
+        staked[msg.sender] = 0;
     }
 
-    function claimRewards() external {
-        stakeRewards[msg.sender] = totalRewarded();
-        require(stakeRewards[msg.sender] > 0, "Nothing to claim");
-        console.log("Sender balance is %s tokens", stakeRewards[msg.sender]);
+    function amountStaked() external view returns (uint) {
+        return staked[msg.sender];
+    }
+
+    function totalDeposited() external view returns (uint) {
+        return totalStaked;
+    }
+
+    function claimRewards() public {
+        stakeRewards[msg.sender] = _calculatedReward();
+        require(stakeRewards[msg.sender] > 0, "Staking: Nothing to claim");
         token.transfer(msg.sender, stakeRewards[msg.sender]);
+        claimedRewards[msg.sender] += _calculatedReward();
         totalRewards -= stakeRewards[msg.sender];
         stakeRewards[msg.sender] = 0;
     }
 
-    function calculatedReward() public view returns(uint) {
-        console.log("staked balance is %s tokens", stakes[msg.sender]);
-        console.log("staked rewardable %s tokens", ((stakes[msg.sender] * fixedAPY) / 100));
-        return (stakes[msg.sender] * fixedAPY) / 100;
+    function _calculatedReward() internal view returns (uint) {
+        return
+            (((staked[msg.sender] * fixedAPY) * _percentageTimeRemaining()) /
+                (precision * 100)) - claimedRewards[msg.sender];
     }
 
-    function calculatePercent() public view returns(uint) {
-        if(end > block.timestamp){
-            uint timeRemaining = end - block.timestamp; // put in a new getter function
-            return 1000000000 * (duration - timeRemaining) / duration;
+    function _percentageTimeRemaining() internal view returns (uint) {
+        if (end > block.timestamp) {
+            uint timeRemaining = end - block.timestamp;
+            return (precision * (duration - timeRemaining)) / duration;
         }
-        return 1000000000 * duration / duration;
+        return (precision * duration) / duration;
     }
-
-    function calculatePercentStaked() public view returns(uint) {
-        uint percentStaked = stakes[msg.sender] / totalStaked;
-        return 1000000000 * percentStaked;
-    }
-
-    function totalRewarded() public view returns(uint) {
-        return (calculatePercentStaked() * totalRewards * calculatePercent())/1E18;
-    }
-
 }
