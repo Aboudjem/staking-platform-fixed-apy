@@ -80,8 +80,8 @@ contract StakingPlatform is Ownable {
         stakeRewards[msg.sender] = _calculatedReward();
         require(stakeRewards[msg.sender] > 0, "Staking: Nothing to claim");
         token.transfer(msg.sender, stakeRewards[msg.sender]);
-        claimedRewards[msg.sender] += _calculatedReward();
         totalRewards -= stakeRewards[msg.sender];
+        claimedRewards[msg.sender] += _calculatedReward();
         stakeRewards[msg.sender] = 0;
     }
 
