@@ -1,16 +1,44 @@
 {
+  "name": "stakingplatform",
+  "description": "Retreeb Staking platform",
+  "version": "1.0.0",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha",
+    "lint:fix-sol": "npx prettier --write 'contracts/**/*.sol'",
+    "lint:fix-js": "npx prettier --write 'test/**/*.js'",
+    "lint:fix": "npm run lint:fix-js && npm run lint:fix-sol"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aboudjem/StakingPlatform.git"
+  },
+  "keywords": ["erc20", "staking", "ethereum", "fantom", "ftm", "eth", "solidity"],
+  "author": "Aboudjem",
+  "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/test-helpers": "^0.5.13",
     "chai": "^4.3.4",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.24.2",
     "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.4.4",
-    "hardhat": "^2.6.0",
+    "ethers": "^5.4.6",
+    "hardhat": "^2.6.4",
     "hardhat-gas-reporter": "^1.0.4",
-    "solidity-coverage": "^0.7.16"
+    "prettier": "^2.4.0",
+    "prettier-plugin-solidity": "^1.0.0-beta.18",
+    "solidity-coverage": "^0.7.17"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.2.0"
-  }
+    "@openzeppelin/contracts": "^4.3.1"
+  },
+  "bugs": {
+    "url": "https://github.com/Aboudjem/StakingPlatform/issues"
+  },
+  "homepage": "https://github.com/Aboudjem/StakingPlatform#readme"
 }
