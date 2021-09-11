@@ -1,14 +1,15 @@
-const { utils } = require('ethers');
+const { utils } = require("ethers");
 
 function n18(amount) {
-    return utils.parseUnits(amount, 'ether');
+  return utils.parseUnits(amount, "ether");
 }
 
 async function increaseTime(duration) {
-    await ethers.provider.send('evm_increaseTime', [duration]);
-    await ethers.provider.send('evm_mine');
+  await ethers.provider.send("evm_increaseTime", [duration]);
+  await ethers.provider.send("evm_mine");
 }
 
 module.exports = {
-    n18, increaseTime
-}
+  n18,
+  increaseTime,
+};
