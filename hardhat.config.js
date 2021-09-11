@@ -20,12 +20,10 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
   gasReporter: {
-    enabled: true
+    enabled: false
   },
   networks: {
-    hardhat: {
-      hardfork: "berlin"
-    }
+
   },
-  solidity: "0.8.6",
+  solidity: "0.8.7",
 };
