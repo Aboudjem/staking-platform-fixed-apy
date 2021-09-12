@@ -7,7 +7,7 @@ describe("StakingPlatform", () => {
   let accounts;
   let addresses;
 
-  it("Should deploy the new TreebToken", async () => {
+  it("Should deploy the new Token", async () => {
     const Token = await ethers.getContractFactory("Token");
     token = await Token.deploy(n18("1000000000"));
     await token.deployed();
@@ -64,7 +64,7 @@ describe("StakingPlatform", () => {
     await stakingPlatform.deployed();
   });
 
-  it("Should send Treeb to staking platform", async () => {
+  it("Should send tokens to staking platform", async () => {
     expect(await token.balanceOf(stakingPlatform.address)).to.equal(n18("0"));
     await token.transfer(stakingPlatform.address, n18("5000000"));
     expect(await token.balanceOf(stakingPlatform.address)).to.equal(
