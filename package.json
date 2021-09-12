@@ -16,7 +16,7 @@
     "type": "git",
     "url": "git+https://github.com/RetreebInc/StakingPlatform.git"
   },
-  "keywords": ["erc20", "staking", "ethereum", "fantom", "ftm", "eth", "solidity"],
+  "keywords": ["erc20", "stakingPlatform", "lockup", "fixedAPY", "staking", "ethereum", "fantom", "ftm", "eth", "solidity", "blockchain"],
   "author": "Aboudjem",
   "license": "MIT",
   "devDependencies": {
