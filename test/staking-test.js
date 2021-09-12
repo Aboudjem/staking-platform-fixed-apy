@@ -1,8 +1,7 @@
 const { n18, increaseTime } = require("./helpers");
 const { expect } = require("chai");
-const { utils } = require("ethers");
 
-describe("Token", () => {
+describe("StakingPlatform", () => {
   let token;
   let stakingPlatform;
   let accounts;
@@ -14,33 +13,44 @@ describe("Token", () => {
     await token.deployed();
     accounts = await ethers.getSigners();
     addresses = accounts.map((account) => account.address);
-    console.log("->", addresses);
   });
 
   it("should distribute tokens among users", async () => {
-    console.log((await token.balanceOf(addresses[1])).toString());
+    expect((await token.balanceOf(addresses[1])).toString()).to.equal("0");
     await token.transfer(addresses[1], n18("100000"));
-    console.log((await token.balanceOf(addresses[1])).toString());
+    expect((await token.balanceOf(addresses[1])).toString()).to.equal(
+      "100000000000000000000000"
+    );
 
-    console.log((await token.balanceOf(addresses[2])).toString());
+    expect((await token.balanceOf(addresses[2])).toString()).to.equal("0");
     await token.transfer(addresses[2], n18("350000"));
-    console.log((await token.balanceOf(addresses[2])).toString());
+    expect((await token.balanceOf(addresses[2])).toString()).to.equal(
+      "350000000000000000000000"
+    );
 
-    console.log((await token.balanceOf(addresses[3])).toString());
+    expect((await token.balanceOf(addresses[3])).toString()).to.equal("0");
     await token.transfer(addresses[3], n18("37000"));
-    console.log((await token.balanceOf(addresses[3])).toString());
+    expect((await token.balanceOf(addresses[3])).toString()).to.equal(
+      "37000000000000000000000"
+    );
 
-    console.log((await token.balanceOf(addresses[4])).toString());
+    expect((await token.balanceOf(addresses[4])).toString()).to.equal("0");
     await token.transfer(addresses[4], n18("2000"));
-    console.log((await token.balanceOf(addresses[4])).toString());
+    expect((await token.balanceOf(addresses[4])).toString()).to.equal(
+      "2000000000000000000000"
+    );
 
-    console.log((await token.balanceOf(addresses[5])).toString());
+    expect((await token.balanceOf(addresses[5])).toString()).to.equal("0");
     await token.transfer(addresses[5], n18("1850000"));
-    console.log((await token.balanceOf(addresses[5])).toString());
+    expect((await token.balanceOf(addresses[5])).toString()).to.equal(
+      "1850000000000000000000000"
+    );
 
-    console.log((await token.balanceOf(addresses[6])).toString());
+    expect((await token.balanceOf(addresses[6])).toString()).to.equal("0");
     await token.transfer(addresses[6], n18("33000"));
-    console.log((await token.balanceOf(addresses[6])).toString());
+    expect((await token.balanceOf(addresses[6])).toString()).to.equal(
+      "33000000000000000000000"
+    );
   });
 
   it("Should deploy the new staking platform", async () => {
@@ -65,11 +75,11 @@ describe("Token", () => {
   it("Should deposit to staking platform", async () => {
     for (let i = 1; i <= 6; i++) {
       const balance = await token.balanceOf(addresses[i]);
-      console.log(balance.toString());
       await token
         .connect(accounts[i])
         .approve(stakingPlatform.address, balance);
       await stakingPlatform.connect(accounts[i]).deposit(balance);
+      expect((await token.balanceOf(addresses[i])).toString()).to.equal("0");
     }
   });
 
@@ -95,14 +105,16 @@ describe("Token", () => {
   });
 
   it("Should return the amount staked", async () => {
-    console.log(
+    expect(
       (await stakingPlatform.connect(accounts[1]).amountStaked()).toString()
-    );
+    ).to.equal("100000000000000000000000");
   });
 
   it("Should return and claim rewards staked after 1 day", async () => {
     await increaseTime(60 * 60 * 24);
-    console.log((await stakingPlatform.percentageTimeRemaining()).toString());
+    expect(
+      (await stakingPlatform.percentageTimeRemaining()).toString()
+    ).to.equal("2739");
 
     const user1 = (
       await stakingPlatform.connect(accounts[1]).calculatedReward()
@@ -185,7 +197,6 @@ describe("Token", () => {
 
   it("Should return the amount staked after 1 day", async () => {
     await increaseTime(60 * 60 * 24);
-    console.log((await stakingPlatform.percentageTimeRemaining()).toString());
 
     const user1 = (
       await stakingPlatform.connect(accounts[1]).calculatedReward()
@@ -316,7 +327,6 @@ describe("Token", () => {
 
   it("Should return the amount staked after 1000 day", async () => {
     await increaseTime(1000 * 60 * 60 * 24);
-    console.log((await stakingPlatform.percentageTimeRemaining()).toString());
 
     await stakingPlatform.setPrecision(28);
     const user1 = (
@@ -413,11 +423,6 @@ describe("Token", () => {
   it("Should withdraw initial deposit", async () => {
     await stakingPlatform.setPrecision(8);
 
-    console.log(
-      utils
-        .formatEther(await token.balanceOf(stakingPlatform.address))
-        .toString()
-    );
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(
       "25000000000000000000000"
     );
@@ -438,11 +443,6 @@ describe("Token", () => {
     );
     for (let i = 1; i <= 6; i++) {
       await stakingPlatform.connect(accounts[i]).withdraw();
-      console.log(
-        utils
-          .formatEther(await token.balanceOf(stakingPlatform.address))
-          .toString()
-      );
     }
 
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(

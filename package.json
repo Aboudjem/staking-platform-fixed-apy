@@ -6,7 +6,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "npx hardhat test",
+    "test:coverage": "npx hardhat coverage",
     "lint:fix-sol": "npx prettier --write 'contracts/**/*.sol'",
     "lint:fix-js": "npx prettier --write 'test/**/*.js'",
     "lint:fix": "npm run lint:fix-js && npm run lint:fix-sol"
