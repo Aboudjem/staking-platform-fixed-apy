@@ -54,12 +54,14 @@ describe("StakingPlatform", () => {
   });
 
   it("Should deploy the new staking platform", async () => {
-    const StakingPlatform = await ethers.getContractFactory("Tester");
+    const StakingPlatform = await ethers.getContractFactory(
+      "StakingPlatformTester"
+    );
     stakingPlatform = await StakingPlatform.deploy(
       token.address,
+      25,
       365,
-      n18("5000000"),
-      25
+      n18("5000000")
     );
     await stakingPlatform.deployed();
   });
