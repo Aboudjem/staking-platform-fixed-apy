@@ -30,4 +30,4 @@ Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
 
 - User1 deposit `100000 TKN`
 - after 1 day User1 can claim `~68.4750 TKN`
-- after 1 year User1 can claim `25000 TKN`
+- after 1 year User1 can claim `25000 TKN`, 25% of 100,000 TKN
