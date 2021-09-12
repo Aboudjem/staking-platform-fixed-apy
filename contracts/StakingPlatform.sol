@@ -68,21 +68,20 @@ contract StakingPlatform is Ownable {
         staked[msg.sender] = 0;
     }
 
+    function claimRewards() public {
+        stakeRewards[msg.sender] = _calculatedReward();
+        require(stakeRewards[msg.sender] > 0, "Staking: Nothing to claim");
+        token.transfer(msg.sender, stakeRewards[msg.sender]);
+        claimedRewards[msg.sender] += _calculatedReward();
+        stakeRewards[msg.sender] = 0;
+    }
+
     function amountStaked() external view returns (uint) {
         return staked[msg.sender];
     }
 
     function totalDeposited() external view returns (uint) {
         return totalStaked;
-    }
-
-    function claimRewards() public {
-        stakeRewards[msg.sender] = _calculatedReward();
-        require(stakeRewards[msg.sender] > 0, "Staking: Nothing to claim");
-        token.transfer(msg.sender, stakeRewards[msg.sender]);
-        //        totalRewards -= stakeRewards[msg.sender];
-        claimedRewards[msg.sender] += _calculatedReward();
-        stakeRewards[msg.sender] = 0;
     }
 
     function _calculatedReward() internal view returns (uint) {
