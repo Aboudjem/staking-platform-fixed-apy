@@ -12,11 +12,11 @@ contract StakingPlatform is Ownable {
     uint public start;
     uint public end;
 
-    uint public totalRewards;
     uint public immutable duration;
+
     uint totalStaked = 0;
     uint precision = 1E6;
-    uint maxStake = 50_000_000 * 1E18;
+    uint public immutable maxStaking;
 
     mapping(address => uint) public staked;
     mapping(address => uint) public stakeRewards;
@@ -24,14 +24,14 @@ contract StakingPlatform is Ownable {
 
     constructor(
         address _token,
-        uint _duration,
-        uint _rewards,
-        uint8 _fixedAPY
+        uint8 _fixedAPY,
+        uint _durationInDays,
+        uint _maxStake
     ) {
-        duration = _duration * 1 days;
-        totalRewards = _rewards;
+        duration = _durationInDays * 1 days;
         token = IERC20(_token);
         fixedAPY = _fixedAPY;
+        maxStaking = _maxStake;
     }
 
     function startStaking() external onlyOwner {
@@ -46,7 +46,7 @@ contract StakingPlatform is Ownable {
             "Deposit: Cannot deposit after the end of the period"
         );
         require(
-            totalStaked + amount <= maxStake,
+            totalStaked + amount <= maxStaking,
             "Deposit: Amount staked exceeds MaxStake"
         );
         stakeRewards[msg.sender] = _calculatedReward();
@@ -68,21 +68,20 @@ contract StakingPlatform is Ownable {
         staked[msg.sender] = 0;
     }
 
+    function claimRewards() public {
+        stakeRewards[msg.sender] = _calculatedReward();
+        require(stakeRewards[msg.sender] > 0, "Staking: Nothing to claim");
+        token.transfer(msg.sender, stakeRewards[msg.sender]);
+        claimedRewards[msg.sender] += _calculatedReward();
+        stakeRewards[msg.sender] = 0;
+    }
+
     function amountStaked() external view returns (uint) {
         return staked[msg.sender];
     }
 
     function totalDeposited() external view returns (uint) {
         return totalStaked;
-    }
-
-    function claimRewards() public {
-        stakeRewards[msg.sender] = _calculatedReward();
-        require(stakeRewards[msg.sender] > 0, "Staking: Nothing to claim");
-        token.transfer(msg.sender, stakeRewards[msg.sender]);
-        totalRewards -= stakeRewards[msg.sender];
-        claimedRewards[msg.sender] += _calculatedReward();
-        stakeRewards[msg.sender] = 0;
     }
 
     function _calculatedReward() internal view returns (uint) {

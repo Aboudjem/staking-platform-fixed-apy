@@ -3,13 +3,13 @@ pragma solidity ^0.8.7;
 
 import "./StakingPlatform.sol";
 
-contract Tester is StakingPlatform {
+contract StakingPlatformTester is StakingPlatform {
     constructor(
         address _token,
-        uint _duration,
-        uint _rewards,
-        uint8 _fixedAPY
-    ) StakingPlatform(_token, _duration, _rewards, _fixedAPY) {}
+        uint8 _fixedAPY,
+        uint _durationInDays,
+        uint _maxStaking
+    ) StakingPlatform(_token, _fixedAPY, _durationInDays, _maxStaking) {}
 
     function setPrecision(uint _precision) public {
         precision = 10**_precision;
