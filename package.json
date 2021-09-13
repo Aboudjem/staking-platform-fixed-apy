@@ -1,6 +1,6 @@
 {
-  "name": "stakingplatform",
-  "description": "Retreeb Staking platform",
+  "name": "staking-platform-fixed-apy",
+  "description": "Staking platform with lockup and fixed APY",
   "version": "1.0.0",
   "directories": {
     "test": "test"
