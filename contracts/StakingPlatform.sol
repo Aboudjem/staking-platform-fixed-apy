@@ -64,16 +64,18 @@ contract StakingPlatform is Ownable {
             "Lockup: Cannot withdraw until the end of the period"
         );
         totalStaked -= staked[msg.sender];
+        uint stakedBalance = staked[msg.sender];
         staked[msg.sender] = 0;
-        token.transfer(msg.sender, staked[msg.sender]);
+        token.transfer(msg.sender, stakedBalance);
     }
 
     function claimRewards() public {
         stakeRewards[msg.sender] = _calculatedReward();
         require(stakeRewards[msg.sender] > 0, "Staking: Nothing to claim");
         claimedRewards[msg.sender] += _calculatedReward();
+        uint stakedRewards = stakeRewards[msg.sender];
         stakeRewards[msg.sender] = 0;
-        token.transfer(msg.sender, stakeRewards[msg.sender]);
+        token.transfer(msg.sender, stakedRewards);
     }
 
     function amountStaked() external view returns (uint) {
