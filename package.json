@@ -21,7 +21,19 @@
     "type": "git",
     "url": "git+https://github.com/Aboudjem/StakingPlatform.git"
   },
-  "keywords": ["erc20", "stakingPlatform", "lockup", "fixedAPY", "staking", "ethereum", "fantom", "ftm", "eth", "solidity", "blockchain"],
+  "keywords": [
+    "erc20",
+    "stakingPlatform",
+    "lockup",
+    "fixedAPY",
+    "staking",
+    "ethereum",
+    "fantom",
+    "ftm",
+    "eth",
+    "solidity",
+    "blockchain"
+  ],
   "author": "Aboudjem",
   "license": "MIT",
   "devDependencies": {

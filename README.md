@@ -29,8 +29,9 @@ Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
 - Maximum of tokens that can be deposited
 
 ## Examples
+
 - Staking platform is deployed with 25% of APY
-- *User1* deposit `100000 TKN`
+- _User1_ deposit `100000 TKN`
 - Staking platform starts
 - after 1 day User1 can claim `~68.4750 TKN`
 - after 1 year User1 can claim `25000 TKN`, 25% of 100,000 TKN
