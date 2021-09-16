@@ -1,6 +1,6 @@
 {
-  "name": "stakingplatform",
-  "description": "Retreeb Staking platform",
+  "name": "staking-platform-fixed-apy",
+  "description": "Staking platform with lockup and fixed APY",
   "version": "1.0.0",
   "directories": {
     "test": "test"
@@ -8,35 +8,62 @@
   "scripts": {
     "test": "npx hardhat test",
     "test:coverage": "npx hardhat coverage",
-    "lint:fix-sol": "npx prettier --write 'contracts/**/*.sol'",
-    "lint:fix-js": "npx prettier --write 'test/**/*.js'",
-    "lint:fix": "npm run lint:fix-js && npm run lint:fix-sol"
+    "compile": "npx hardhat compile",
+    "lint:js": "npx eslint '**/*.js'",
+    "lint:js-fix": "npx eslint '**/*.js' --fix",
+    "lint:sol": "npx prettier '**/*.{json,sol,md}' --check && npx solhint 'contracts/**/*.sol'",
+    "lint:sol-fix": "npx prettier '**/*.{json,sol,md}' --write && npx solhint 'contracts/**/*.sol' --fix",
+    "lint": "npm run lint:js && npm run lint:sol",
+    "lint:fix": "npm run lint:js-fix && npm run lint:sol-fix",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RetreebInc/StakingPlatform.git"
   },
-  "keywords": ["erc20", "stakingPlatform", "lockup", "fixedAPY", "staking", "ethereum", "fantom", "ftm", "eth", "solidity", "blockchain"],
+  "keywords": [
+    "erc20",
+    "stakingPlatform",
+    "lockup",
+    "fixedAPY",
+    "staking",
+    "ethereum",
+    "fantom",
+    "ftm",
+    "eth",
+    "solidity",
+    "blockchain"
+  ],
   "author": "Aboudjem",
   "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/test-helpers": "^0.5.13",
     "chai": "^4.3.4",
+    "coveralls": "^3.1.1",
+    "dotenv": "^10.0.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^5.1.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.6",
     "hardhat": "^2.6.4",
     "hardhat-gas-reporter": "^1.0.4",
-    "prettier": "^2.4.0",
+    "husky": "^7.0.2",
+    "prettier": "^2.4.1",
     "prettier-plugin-solidity": "^1.0.0-beta.18",
+    "solhint": "^3.3.6",
     "solidity-coverage": "^0.7.17"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.1"
+    "@openzeppelin/contracts": "^4.3.2"
   },
   "bugs": {
     "url": "https://github.com/RetreebInc/StakingPlatform/issues"
