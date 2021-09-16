@@ -2,7 +2,6 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/Aboudjem/staking-platform-fixed-apy/badge.svg?branch=features/actions)](https://coveralls.io/github/Aboudjem/staking-platform-fixed-apy?branch=features/actions)
 
-
 Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
 
 ## Workflow
