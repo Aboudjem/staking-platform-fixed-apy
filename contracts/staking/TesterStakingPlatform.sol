@@ -16,7 +16,7 @@ contract StakingPlatformTester is StakingPlatform {
     }
 
     function calculatedReward() external view returns (uint) {
-        return _calculatedReward();
+        return _calculateRewards(msg.sender);
     }
 
     function percentageTimeRemaining() external view returns (uint) {
