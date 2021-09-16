@@ -7,15 +7,15 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract StakingPlatform is Ownable {
     IERC20 public token;
 
-    uint8 fixedAPY;
+    uint8 public fixedAPY;
 
     uint public start;
     uint public end;
 
     uint public immutable duration;
 
-    uint totalStaked = 0;
-    uint precision = 1E6;
+    uint private totalStaked = 0;
+    uint internal precision = 1E6;
     uint public immutable maxStaking;
 
     mapping(address => uint) public staked;
@@ -63,17 +63,19 @@ contract StakingPlatform is Ownable {
             block.timestamp >= end,
             "Lockup: Cannot withdraw until the end of the period"
         );
-        token.transfer(msg.sender, staked[msg.sender]);
         totalStaked -= staked[msg.sender];
+        uint stakedBalance = staked[msg.sender];
         staked[msg.sender] = 0;
+        token.transfer(msg.sender, stakedBalance);
     }
 
     function claimRewards() public {
         stakeRewards[msg.sender] = _calculatedReward();
         require(stakeRewards[msg.sender] > 0, "Staking: Nothing to claim");
-        token.transfer(msg.sender, stakeRewards[msg.sender]);
         claimedRewards[msg.sender] += _calculatedReward();
+        uint stakedRewards = stakeRewards[msg.sender];
         stakeRewards[msg.sender] = 0;
+        token.transfer(msg.sender, stakedRewards);
     }
 
     function amountStaked() external view returns (uint) {
