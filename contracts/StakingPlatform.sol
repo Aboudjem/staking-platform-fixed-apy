@@ -15,7 +15,7 @@ contract StakingPlatform is Ownable {
     uint public immutable duration;
 
     uint private totalStaked = 0;
-    uint private precision = 1E6;
+    uint internal precision = 1E6;
     uint public immutable maxStaking;
 
     mapping(address => uint) public staked;
