@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract StakingPlatform is Ownable {
     IERC20 public token;
 
-    uint8 fixedAPY;
+    uint8 public fixedAPY;
 
     uint public start;
     uint public end;
