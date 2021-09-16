@@ -1,6 +1,6 @@
 {
-  "name": "stakingplatform",
-  "description": "Staking platform",
+  "name": "staking-platform-fixed-apy",
+  "description": "Staking platform with lockup and fixed APY",
   "version": "1.0.0",
   "directories": {
     "test": "test"
@@ -21,15 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/Aboudjem/StakingPlatform.git"
   },
-  "keywords": [
-    "erc20",
-    "staking",
-    "ethereum",
-    "fantom",
-    "ftm",
-    "eth",
-    "solidity"
-  ],
+  "keywords": ["erc20", "stakingPlatform", "lockup", "fixedAPY", "staking", "ethereum", "fantom", "ftm", "eth", "solidity", "blockchain"],
   "author": "Aboudjem",
   "license": "MIT",
   "devDependencies": {
