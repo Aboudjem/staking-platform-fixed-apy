@@ -1,16 +1,17 @@
 # StakingPlatform
 
-Fixed APY Staking platform with Lockup and fixed APY, duration and max stake 
+Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
 
 ## Workflow
 
-- Deploy StakingPlatform with the appropriate parameters (See *Constructor* below)
+- Deploy StakingPlatform with the appropriate parameters (See _Constructor_ below)
 - Users should deposit their tokens before or during the staking period
 - Run `Start()` function launch the staking
 - Users can claim their rewards using `claimRewards()`
 - Once staking is finished users can withdraw their initial deposit using `withdraw()`
 
 ## Constructor
+
 ```
    constructor(
         address _token,
@@ -18,13 +19,12 @@ Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
         uint _durationInDays,
         uint _maxStake
     )
-  ```
+```
 
 - Address of the ERC20 Token to be used by the Staking platform
 - fixed APY rates (must be consistent with the maxStake)
 - Duration (e.g, 365 == 1year)
 - Maximum of tokens that can be deposited
-
 
 ## Examples
 
