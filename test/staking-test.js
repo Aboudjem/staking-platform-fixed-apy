@@ -90,12 +90,13 @@ describe("StakingPlatform", () => {
   });
 
   it("Should start Staking and ending period should last 1 year", async () => {
-    expect((await stakingPlatform.start()).toString()).to.equal("0");
+    expect((await stakingPlatform.startPeriod()).toString()).to.equal("0");
     await stakingPlatform.startStaking();
-    expect((await stakingPlatform.start()).toString()).to.not.equal("0");
+    expect((await stakingPlatform.startPeriod()).toString()).to.not.equal("0");
     expect(
       (
-        (await stakingPlatform.end()) - (await stakingPlatform.start())
+        (await stakingPlatform.endPeriod()) -
+        (await stakingPlatform.startPeriod())
       ).toString()
     ).to.equal("31536000");
   });
@@ -289,6 +290,20 @@ describe("StakingPlatform", () => {
     expect(
       (await stakingPlatform.connect(accounts[6]).calculatedReward()).toString()
     ).to.equal("0");
+  });
+
+  it("Should return the amount of rewards for a specific user after 1 day", async () => {
+    const user1RewardsBefore = (
+      await stakingPlatform.rewardOf(addresses[1])
+    ).toString();
+    expect(user1RewardsBefore).to.equal("0");
+
+    await increaseTime(60 * 60 * 24);
+
+    const user1RewardsAfter = (
+      await stakingPlatform.rewardOf(addresses[1])
+    ).toString();
+    expect(user1RewardsAfter).to.equal("68500000000000000000");
   });
 
   it("Should revert if exceed the max staking amount", async () => {
