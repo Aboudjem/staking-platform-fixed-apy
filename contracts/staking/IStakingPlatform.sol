@@ -45,7 +45,7 @@ interface IStakingPlatform {
      * @param stakeHolder, address of the user to be checked
      * @return uint amount of claimable tokens by the caller
      */
-    function rewardOf(address _stakeHolder) external view returns (uint);
+    function rewardOf(address stakeHolder) external view returns (uint);
 
     /**
      * @notice function that claims pending rewards
