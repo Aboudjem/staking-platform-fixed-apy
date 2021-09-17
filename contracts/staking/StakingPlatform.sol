@@ -5,6 +5,8 @@ import "./IStakingPlatform.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/// @author RetreebInc
+/// @title Staking Platform with fixed APY and lockup
 contract StakingPlatform is IStakingPlatform, Ownable {
     IERC20 public immutable token;
     uint8 public immutable fixedAPY;
@@ -21,6 +23,10 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     mapping(address => uint) public stakeRewardsToClaim;
     mapping(address => uint) public claimedRewards;
 
+    /**
+     * @notice constructor contains all the parameters of the staking platform
+     * @dev all parameters are immutable
+     */
     constructor(
         address _token,
         uint8 _fixedAPY,
@@ -33,6 +39,11 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         maxAmountStaked = _maxAmountStaked;
     }
 
+    /**
+     * @notice function that start the staking
+     * @dev set `startPeriod` to the current current `block.timestamp`
+     * as well as the `endPeriod` which is `startPeriod` + `stakingDuration`
+     */
     function startStaking() external override onlyOwner {
         require(startPeriod == 0, "Staking: Staking already started");
         startPeriod = block.timestamp;
@@ -40,6 +51,12 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         emit StartStaking(startPeriod, endPeriod);
     }
 
+    /**
+     * @notice function that allows a user to deposit tokens
+     * @dev user must first approve the amount to deposit before calling this function,
+     * cannot exceed the `maxAmountStaked`
+     * @param amount, the amount to be deposited
+     */
     function deposit(uint amount) external override {
         require(
             endPeriod == 0 || endPeriod > block.timestamp,
@@ -59,6 +76,10 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         emit Deposit(msg.sender, amount);
     }
 
+    /**
+     * @notice function that allows a user to withdraw its initial deposit
+     * @dev must be called only when `block.timestamp` >= `endPeriod`
+     */
     function withdraw() external override {
         require(
             block.timestamp >= endPeriod,
@@ -71,23 +92,43 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         emit Withdraw(msg.sender, stakedBalance);
     }
 
+    /**
+     * @notice function that returns the amount of total Staked tokens
+     * for a specific user
+     * @return uint amount of the total deposited Tokens by the caller
+     */
     function amountStaked() external view override returns (uint) {
         return staked[msg.sender];
     }
 
+    /**
+     * @notice function that returns the amount of total Staked tokens
+     * on the smart contract
+     * @return uint amount of the total deposited Tokens
+     */
     function totalDeposited() external view override returns (uint) {
         return totalStaked;
     }
 
-    function rewardOf(address _stakeHolder)
+    /**
+     * @notice function that returns the amount of pending rewards
+     * that can be claimed by the user
+     * @param stakeHolder, address of the user to be checked
+     * @return uint amount of claimable tokens by the caller
+     */
+    function rewardOf(address stakeHolder)
         external
         view
         override
         returns (uint)
     {
-        return _calculateRewards(_stakeHolder);
+        return _calculateRewards(stakeHolder);
     }
 
+    /**
+     * @notice function that claims pending rewards
+     * @dev transfer the pending rewards to the user address
+     */
     function claimRewards() public override {
         stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
         require(
@@ -101,16 +142,27 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         emit Claim(msg.sender, stakedRewards);
     }
 
-    function _calculateRewards(address _stakeHolder)
+    /**
+     * @notice calculate rewards based on the `fixedAPY`, `_percentageTimeRemaining()`
+     * @dev the higher is the precision and the more the time remaining will be precise
+     * @param stakeHolder, address of the user to be checked
+     * @return uint amount of claimable tokens of the specified address
+     */
+    function _calculateRewards(address stakeHolder)
         internal
         view
         returns (uint)
     {
         return
-            (((staked[_stakeHolder] * fixedAPY) * _percentageTimeRemaining()) /
-                (precision * 100)) - claimedRewards[_stakeHolder];
+            (((staked[stakeHolder] * fixedAPY) * _percentageTimeRemaining()) /
+                (precision * 100)) - claimedRewards[stakeHolder];
     }
 
+    /**
+     * @notice function that returns the remaining time in seconds of the staking period
+     * @dev the higher is the precision and the more the time remaining will be precise
+     * @return uint percentage of time remaining * precision
+     */
     function _percentageTimeRemaining() internal view returns (uint) {
         if (endPeriod > block.timestamp) {
             uint timeRemaining = endPeriod - block.timestamp;
