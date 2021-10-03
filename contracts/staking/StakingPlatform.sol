@@ -134,10 +134,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      */
     function claimRewards() public override {
         stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
-        require(
-            stakeRewardsToClaim[msg.sender] > 0,
-            "Nothing to claim"
-        );
+        require(stakeRewardsToClaim[msg.sender] > 0, "Nothing to claim");
         claimedRewards[msg.sender] += _calculateRewards(msg.sender);
         uint stakedRewards = stakeRewardsToClaim[msg.sender];
         stakeRewardsToClaim[msg.sender] = 0;
