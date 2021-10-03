@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity =0.8.8;
 
 import "./IStakingPlatform.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @author RetreebInc
 /// @title Staking Platform with fixed APY and lockup
@@ -45,7 +45,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * as well as the `endPeriod` which is `startPeriod` + `stakingDuration`
      */
     function startStaking() external override onlyOwner {
-        require(startPeriod == 0, "Staking: Staking already started");
+        require(startPeriod == 0, "Staking has already started");
         startPeriod = block.timestamp;
         endPeriod = block.timestamp + stakingDuration;
         emit StartStaking(startPeriod, endPeriod);
@@ -60,17 +60,20 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     function deposit(uint amount) external override {
         require(
             endPeriod == 0 || endPeriod > block.timestamp,
-            "Deposit: Cannot deposit after the end of the period"
+            "Staking period ended"
         );
         require(
             totalStaked + amount <= maxAmountStaked,
-            "Deposit: Amount staked exceeds MaxStake"
+            "Amount staked exceeds MaxStake"
         );
         stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
         if (stakeRewardsToClaim[msg.sender] > 0) {
             claimRewards();
         }
-        require(token.transferFrom(msg.sender, address(this), amount), "Error");
+        require(
+            token.transferFrom(msg.sender, address(this), amount),
+            "ERC20: transferFrom failed"
+        );
         staked[msg.sender] += amount;
         totalStaked += amount;
         emit Deposit(msg.sender, amount);
@@ -83,7 +86,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     function withdraw() external override {
         require(
             block.timestamp >= endPeriod,
-            "Lockup: Cannot withdraw until the end of the period"
+            "Withdrawal unable before ending"
         );
         totalStaked -= staked[msg.sender];
         uint stakedBalance = staked[msg.sender];
@@ -131,10 +134,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      */
     function claimRewards() public override {
         stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
-        require(
-            stakeRewardsToClaim[msg.sender] > 0,
-            "Staking: Nothing to claim"
-        );
+        require(stakeRewardsToClaim[msg.sender] > 0, "Nothing to claim");
         claimedRewards[msg.sender] += _calculateRewards(msg.sender);
         uint stakedRewards = stakeRewardsToClaim[msg.sender];
         stakeRewardsToClaim[msg.sender] = 0;

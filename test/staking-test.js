@@ -103,7 +103,7 @@ describe("StakingPlatform", () => {
 
   it("Should fail if trying to start Staking twice", async () => {
     await expect(stakingPlatform.startStaking()).to.revertedWith(
-      "Staking: Staking already started"
+      "Staking has already started"
     );
   });
 
@@ -309,7 +309,7 @@ describe("StakingPlatform", () => {
   it("Should revert if exceed the max staking amount", async () => {
     await token.approve(stakingPlatform.address, n18("50000000"));
     await expect(stakingPlatform.deposit(n18("50000000"))).to.revertedWith(
-      "Deposit: Amount staked exceeds MaxStake"
+      "Amount staked exceeds MaxStake"
     );
   });
 
@@ -331,7 +331,7 @@ describe("StakingPlatform", () => {
 
   it("Should fail withdraw tokens before ending period", async () => {
     await expect(stakingPlatform.withdraw()).to.revertedWith(
-      "Lockup: Cannot withdraw until the end of the period"
+      "Withdrawal unable before ending"
     );
   });
 
@@ -494,6 +494,6 @@ describe("StakingPlatform", () => {
     await token.connect(accounts[1]).approve(stakingPlatform.address, "1000");
     await expect(
       stakingPlatform.connect(accounts[1]).deposit("1000")
-    ).to.be.revertedWith("Deposit: Cannot deposit after the end of the period");
+    ).to.be.revertedWith("Staking period ended");
   });
 });
