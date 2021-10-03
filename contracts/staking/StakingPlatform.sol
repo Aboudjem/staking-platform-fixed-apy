@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity =0.8.8;
 
 import "./IStakingPlatform.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @author RetreebInc
 /// @title Staking Platform with fixed APY and lockup
@@ -70,7 +70,10 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         if (stakeRewardsToClaim[msg.sender] > 0) {
             claimRewards();
         }
-        require(token.transferFrom(msg.sender, address(this), amount), "Error");
+        require(
+            token.transferFrom(msg.sender, address(this), amount),
+            "ERC20: transferFrom failed"
+        );
         staked[msg.sender] += amount;
         totalStaked += amount;
         emit Deposit(msg.sender, amount);
