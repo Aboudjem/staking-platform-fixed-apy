@@ -3,7 +3,7 @@
   "rules": {
     "compiler-version": ["error", "^0.8.0"],
     "func-visibility": ["warn", { "ignoreConstructors": true }],
-    "reason-string": ["off", { "maxLength": 32 }],
+    "reason-string": ["warn", { "maxLength": 32 }],
     "not-rely-on-time": "off",
     "no-empty-blocks": "off"
   }
