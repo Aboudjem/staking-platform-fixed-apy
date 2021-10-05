@@ -153,6 +153,9 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         view
         returns (uint)
     {
+        if(startPeriod == 0) {
+            return 0;
+        }
         return
             (((staked[stakeHolder] * fixedAPY) * _percentageTimeRemaining()) /
                 (precision * 100)) - claimedRewards[stakeHolder];
