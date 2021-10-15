@@ -67,7 +67,7 @@ describe("StakingPlatform", () => {
       25,
       365,
       200,
-      n18("5000000")
+      n18("20000000")
     );
     await stakingPlatform.deployed();
   });
@@ -373,7 +373,6 @@ describe("StakingPlatform", () => {
 
   it("Should return the amount staked after 1000 day", async () => {
     await increaseTime(1000 * 60 * 60 * 24);
-    // console.log(test.toString());
 
     let user7Balance = (await token.balanceOf(addresses[7])).toString();
     expect(user7Balance).to.equal("11390412500000000000000");
