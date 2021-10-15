@@ -114,8 +114,8 @@ describe("StakingPlatform", () => {
     await stakingPlatform.connect(accounts[1]).withdraw();
     await stakingPlatform.connect(accounts[2]).withdraw();
 
-    const balance1 = String(await token.balanceOf(addresses[1])).slice(0, 9);
-    expect(balance1).to.equal("113624806");
+    const balance1 = String(await token.balanceOf(addresses[1])).slice(0, 8);
+    expect(balance1).to.equal("11362480");
 
     expect((await token.balanceOf(addresses[2])).toString()).to.equal(
       "112000000000000000000000"
