@@ -9,14 +9,14 @@ contract StakingPlatformTester is StakingPlatform {
         uint8 _fixedAPY,
         uint _durationInDays,
         uint _lockupDurationInDays,
-        uint _maxStaking
+        uint _stakingMax
     )
         StakingPlatform(
             _token,
             _fixedAPY,
             _durationInDays,
             _lockupDurationInDays,
-            _maxStaking
+            _stakingMax
         )
     {}
 
