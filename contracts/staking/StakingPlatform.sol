@@ -95,6 +95,10 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             block.timestamp >= lockupPeriod,
             "Withdrawal unable before ending"
         );
+        stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
+        if (stakeRewardsToClaim[msg.sender] > 0) {
+            claimRewards();
+        }
         totalStaked -= staked[msg.sender];
         uint stakedBalance = staked[msg.sender];
         staked[msg.sender] = 0;
