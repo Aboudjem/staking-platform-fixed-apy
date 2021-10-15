@@ -55,11 +55,6 @@ describe("StakingPlatform", () => {
     expect((await token.balanceOf(addresses[7])).toString()).to.equal(
       "10000000000000000000000"
     );
-
-    await token.transfer(addresses[8], n18("100000"));
-    expect((await token.balanceOf(addresses[8])).toString()).to.equal(
-      "100000000000000000000000"
-    );
   });
 
   it("Should deploy the new staking platform", async () => {
@@ -89,7 +84,7 @@ describe("StakingPlatform", () => {
   });
 
   it("Should deposit to staking platform", async () => {
-    for (let i = 1; i <= 8; i++) {
+    for (let i = 1; i <= 7; i++) {
       const balance = await token.balanceOf(addresses[i]);
       await token
         .connect(accounts[i])
@@ -100,7 +95,7 @@ describe("StakingPlatform", () => {
   });
 
   it("Should return the amount staked", async () => {
-    expect(await stakingPlatform.totalDeposited()).to.equal(n18("2482000"));
+    expect(await stakingPlatform.totalDeposited()).to.equal(n18("2382000"));
   });
 
   it("Should start Staking and ending period should last 1 year", async () => {
@@ -210,15 +205,6 @@ describe("StakingPlatform", () => {
     expect(
       (await stakingPlatform.connect(accounts[6]).calculatedReward()).toString()
     ).to.equal("0");
-  });
-
-  it("Should claim and restake", async () => {
-    await stakingPlatform.connect(accounts[8]).claimRewards();
-    const balanceOfUser8 = await token.balanceOf(addresses[8]);
-    await token
-      .connect(accounts[8])
-      .approve(stakingPlatform.address, balanceOfUser8);
-    await stakingPlatform.connect(accounts[8]).deposit(balanceOfUser8);
   });
 
   it("Should revert if exceed the max staking amount", async () => {
@@ -451,10 +437,6 @@ describe("StakingPlatform", () => {
   });
 
   it("Should return the amount staked", async () => {
-    expect(await stakingPlatform.totalDeposited()).to.equal(n18("0"));
-  });
-
-  it("Should return the rewarded staked", async () => {
     expect(await stakingPlatform.totalDeposited()).to.equal(n18("0"));
   });
 });
