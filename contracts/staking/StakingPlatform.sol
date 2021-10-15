@@ -14,7 +14,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
 
     uint public immutable stakingDuration;
     uint public immutable lockupDuration;
-    uint public immutable maxAmountStaked;
+    uint public immutable stakingMax;
 
     uint public startPeriod;
     uint public lockupPeriod;
@@ -42,7 +42,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         lockupDuration = _lockDurationInDays * 1 days;
         token = IERC20(_token);
         fixedAPY = _fixedAPY;
-        maxAmountStaked = _maxAmountStaked;
+        stakingMax = _maxAmountStaked;
     }
 
     /**
@@ -70,7 +70,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             "Staking period ended"
         );
         require(
-            totalStaked + amount <= maxAmountStaked,
+            totalStaked + amount <= stakingMax,
             "Amount staked exceeds MaxStake"
         );
         stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
