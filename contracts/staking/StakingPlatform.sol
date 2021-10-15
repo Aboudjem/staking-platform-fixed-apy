@@ -160,7 +160,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         view
         returns (uint)
     {
-        if (startPeriod == 0) {
+        if (startPeriod == 0 || staked[stakeHolder] == 0) {
             return 0;
         }
         return
