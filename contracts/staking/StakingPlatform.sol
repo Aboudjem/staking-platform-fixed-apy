@@ -9,11 +9,15 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// @title Staking Platform with fixed APY and lockup
 contract StakingPlatform is IStakingPlatform, Ownable {
     IERC20 public immutable token;
+
     uint8 public immutable fixedAPY;
+
     uint public immutable stakingDuration;
+    uint public immutable lockupDuration;
     uint public immutable maxAmountStaked;
 
     uint public startPeriod;
+    uint public lockupPeriod;
     uint public endPeriod;
 
     uint private totalStaked = 0;
@@ -31,9 +35,11 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         address _token,
         uint8 _fixedAPY,
         uint _durationInDays,
+        uint _lockDurationInDays,
         uint _maxAmountStaked
     ) {
         stakingDuration = _durationInDays * 1 days;
+        lockupDuration = _lockDurationInDays * 1 days;
         token = IERC20(_token);
         fixedAPY = _fixedAPY;
         maxAmountStaked = _maxAmountStaked;
@@ -47,6 +53,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     function startStaking() external override onlyOwner {
         require(startPeriod == 0, "Staking has already started");
         startPeriod = block.timestamp;
+        lockupPeriod = block.timestamp + lockupDuration;
         endPeriod = block.timestamp + stakingDuration;
         emit StartStaking(startPeriod, endPeriod);
     }
@@ -85,7 +92,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      */
     function withdraw() external override {
         require(
-            block.timestamp >= endPeriod,
+            block.timestamp >= lockupPeriod,
             "Withdrawal unable before ending"
         );
         totalStaked -= staked[msg.sender];
