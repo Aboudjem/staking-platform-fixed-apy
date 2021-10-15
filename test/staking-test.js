@@ -51,6 +51,11 @@ describe("StakingPlatform", () => {
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
       "33000000000000000000000"
     );
+
+    await token.transfer(addresses[7], n18("10000"));
+    expect((await token.balanceOf(addresses[7])).toString()).to.equal(
+      "10000000000000000000000"
+    );
   });
 
   it("Should deploy the new staking platform", async () => {
@@ -61,6 +66,7 @@ describe("StakingPlatform", () => {
       token.address,
       25,
       365,
+      200,
       n18("5000000")
     );
     await stakingPlatform.deployed();
@@ -75,7 +81,7 @@ describe("StakingPlatform", () => {
   });
 
   it("Should deposit to staking platform", async () => {
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 7; i++) {
       const balance = await token.balanceOf(addresses[i]);
       await token
         .connect(accounts[i])
@@ -86,7 +92,7 @@ describe("StakingPlatform", () => {
   });
 
   it("Should return the amount staked", async () => {
-    expect(await stakingPlatform.totalDeposited()).to.equal(n18("2372000"));
+    expect(await stakingPlatform.totalDeposited()).to.equal(n18("2382000"));
   });
 
   it("Should start Staking and ending period should last 1 year", async () => {
@@ -342,8 +348,48 @@ describe("StakingPlatform", () => {
     );
   });
 
+  it("Should withdraw tokens after lockup period", async () => {
+    let userBalance = (await token.balanceOf(addresses[7])).toString();
+    expect(userBalance).to.equal("0");
+
+    let userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
+    expect(userRewards).to.equal("20547500000000000000");
+    await expect(
+      stakingPlatform.connect(accounts[7]).withdraw()
+    ).to.revertedWith("Withdrawal unable before ending");
+    await increaseTime(200 * 60 * 60 * 24);
+
+    userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
+    expect(userRewards).to.equal("1390412500000000000000");
+
+    await stakingPlatform.connect(accounts[7]).withdraw();
+
+    userBalance = (await token.balanceOf(addresses[7])).toString();
+    userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
+
+    expect(userBalance).to.equal("11390412500000000000000");
+    expect(userRewards).to.equal("0");
+  });
+
   it("Should return the amount staked after 1000 day", async () => {
     await increaseTime(1000 * 60 * 60 * 24);
+    // console.log(test.toString());
+
+    let user7Balance = (await token.balanceOf(addresses[7])).toString();
+    expect(user7Balance).to.equal("11390412500000000000000");
+
+    let user7rewards = (
+      await stakingPlatform.rewardOf(addresses[7])
+    ).toString();
+    expect(user7rewards).to.equal("0");
+
+    await stakingPlatform.connect(accounts[7]).withdraw();
+    user7Balance = (await token.balanceOf(addresses[7])).toString();
+
+    expect(user7Balance).to.equal("11390412500000000000000");
+
+    user7rewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
+    expect(user7rewards).to.equal("0");
 
     await stakingPlatform.setPrecision(28);
     const user1 = (
@@ -458,7 +504,7 @@ describe("StakingPlatform", () => {
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
       "8250000000000000000000"
     );
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 0; i <= 7; i++) {
       await stakingPlatform.connect(accounts[i]).withdraw();
     }
 
@@ -483,7 +529,7 @@ describe("StakingPlatform", () => {
   });
 
   it("Should return the amount staked once staking finished and withdrew", async () => {
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 7; i++) {
       expect(
         (await stakingPlatform.connect(accounts[1]).amountStaked()).toString()
       ).to.equal("0");
@@ -495,5 +541,9 @@ describe("StakingPlatform", () => {
     await expect(
       stakingPlatform.connect(accounts[1]).deposit("1000")
     ).to.be.revertedWith("Staking period ended");
+  });
+
+  it("Should return the amount staked", async () => {
+    expect(await stakingPlatform.totalDeposited()).to.equal(n18("0"));
   });
 });
