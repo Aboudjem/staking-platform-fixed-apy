@@ -108,7 +108,7 @@ describe("StakingPlatform", () => {
 
       await claimAndStake(accounts[1], token, stakingPlatform);
     }
-  });
+  }, 40000);
 
   it("Should withdraw initial deposit", async () => {
     await stakingPlatform.connect(accounts[1]).withdraw();
