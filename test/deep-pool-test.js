@@ -335,6 +335,12 @@ describe("StakingPlatform", () => {
     );
   });
 
+  it("Should fail withdraw residual before ending period", async () => {
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "Withdrawal unable before ending"
+    );
+  });
+
   it("Should fail withdraw tokens before ending period", async () => {
     await expect(stakingPlatform.withdraw()).to.revertedWith(
       "Withdrawal unable before ending"

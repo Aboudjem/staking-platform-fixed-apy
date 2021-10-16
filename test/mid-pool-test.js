@@ -121,4 +121,12 @@ describe("StakingPlatform", () => {
       "112000000000000000000000"
     );
   });
+
+  it("Should withdraw residual balances", async () => {
+    await stakingPlatform.withdrawResidualBalance();
+
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "No residual Balance to withdraw"
+    );
+  });
 });
