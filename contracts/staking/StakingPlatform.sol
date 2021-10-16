@@ -92,7 +92,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     function withdraw() external override {
         require(
             block.timestamp >= lockupPeriod,
-            "no withdraw until lockup ends"
+            "No withdraw until lockup ends"
         );
         stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
         if (stakeRewardsToClaim[msg.sender] > 0) {
@@ -113,8 +113,8 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      */
     function withdrawResidualBalance() external onlyOwner {
         require(
-            block.timestamp >= endPeriod,
-            "Withdrawal unable before ending"
+            block.timestamp >= endPeriod + (365 * 1 days),
+            "Withdraw 1year after endPeriod"
         );
 
         uint balance = IERC20(token).balanceOf(address(this));
