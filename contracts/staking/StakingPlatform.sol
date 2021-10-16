@@ -106,6 +106,24 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     }
 
     /**
+     * @notice claim all remaining balance on the contract
+     * Residual balance is all the remaining tokens that have not been distributed
+     * (e.g, in case the number of stakeholders is not sufficient)
+     * @dev Can only be called one year after the end of the staking period
+     */
+    function withdrawResidualBalance() external onlyOwner {
+        require(
+            block.timestamp >= endPeriod,
+            "Withdrawal unable before ending"
+        );
+
+        uint balance = IERC20(token).balanceOf(address(this));
+        uint residualBalance = balance - (totalStaked);
+        require(residualBalance > 0, "No residual Balance to withdraw");
+        IERC20(token).transfer(owner(), residualBalance);
+    }
+
+    /**
      * @notice function that returns the amount of total Staked tokens
      * for a specific user
      * @return uint amount of the total deposited Tokens by the caller
@@ -136,18 +154,6 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         returns (uint)
     {
         return _calculateRewards(stakeHolder);
-    }
-
-    function withdrawResidualBalance() external onlyOwner {
-        require(
-            block.timestamp >= endPeriod,
-            "Withdrawal unable before ending"
-        );
-
-        uint balance = IERC20(token).balanceOf(address(this));
-        uint residualBalance = balance - (totalStaked);
-        require(residualBalance > 0, "No residual Balance to withdraw");
-        IERC20(token).transfer(owner(), residualBalance);
     }
 
     /**
