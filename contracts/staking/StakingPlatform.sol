@@ -9,11 +9,14 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// @title Staking Platform with fixed APY and lockup
 contract StakingPlatform is IStakingPlatform, Ownable {
     IERC20 public immutable token;
+
     uint8 public immutable fixedAPY;
     uint public immutable stakingDuration;
-    uint public immutable maxAmountStaked;
+    uint public immutable lockupDuration;
+    uint public immutable stakingMax;
 
     uint public startPeriod;
+    uint public lockupPeriod;
     uint public endPeriod;
 
     uint private totalStaked = 0;
@@ -31,12 +34,14 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         address _token,
         uint8 _fixedAPY,
         uint _durationInDays,
+        uint _lockDurationInDays,
         uint _maxAmountStaked
     ) {
         stakingDuration = _durationInDays * 1 days;
+        lockupDuration = _lockDurationInDays * 1 days;
         token = IERC20(_token);
         fixedAPY = _fixedAPY;
-        maxAmountStaked = _maxAmountStaked;
+        stakingMax = _maxAmountStaked;
     }
 
     /**
@@ -47,6 +52,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     function startStaking() external override onlyOwner {
         require(startPeriod == 0, "Staking has already started");
         startPeriod = block.timestamp;
+        lockupPeriod = block.timestamp + lockupDuration;
         endPeriod = block.timestamp + stakingDuration;
         emit StartStaking(startPeriod, endPeriod);
     }
@@ -63,7 +69,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             "Staking period ended"
         );
         require(
-            totalStaked + amount <= maxAmountStaked,
+            totalStaked + amount <= stakingMax,
             "Amount staked exceeds MaxStake"
         );
         stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
@@ -85,14 +91,36 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      */
     function withdraw() external override {
         require(
-            block.timestamp >= endPeriod,
-            "Withdrawal unable before ending"
+            block.timestamp >= lockupPeriod,
+            "No withdraw until lockup ends"
         );
+        stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
+        if (stakeRewardsToClaim[msg.sender] > 0) {
+            claimRewards();
+        }
         totalStaked -= staked[msg.sender];
         uint stakedBalance = staked[msg.sender];
         staked[msg.sender] = 0;
         token.transfer(msg.sender, stakedBalance);
         emit Withdraw(msg.sender, stakedBalance);
+    }
+
+    /**
+     * @notice claim all remaining balance on the contract
+     * Residual balance is all the remaining tokens that have not been distributed
+     * (e.g, in case the number of stakeholders is not sufficient)
+     * @dev Can only be called one year after the end of the staking period
+     */
+    function withdrawResidualBalance() external onlyOwner {
+        require(
+            block.timestamp >= endPeriod + (365 * 1 days),
+            "Withdraw 1year after endPeriod"
+        );
+
+        uint balance = IERC20(token).balanceOf(address(this));
+        uint residualBalance = balance - (totalStaked);
+        require(residualBalance > 0, "No residual Balance to withdraw");
+        IERC20(token).transfer(owner(), residualBalance);
     }
 
     /**
@@ -153,7 +181,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         view
         returns (uint)
     {
-        if (startPeriod == 0) {
+        if (startPeriod == 0 || staked[stakeHolder] == 0) {
             return 0;
         }
         return
