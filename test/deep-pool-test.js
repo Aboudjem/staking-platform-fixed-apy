@@ -337,13 +337,13 @@ describe("StakingPlatform - Deep Pool", () => {
 
   it("Should fail withdraw residual before ending period", async () => {
     await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
-      "Withdrawal unable before ending"
+      "Withdraw 1year after endPeriod"
     );
   });
 
   it("Should fail withdraw tokens before ending period", async () => {
     await expect(stakingPlatform.withdraw()).to.revertedWith(
-      "no withdraw until lockup ends"
+      "No withdraw until lockup ends"
     );
   });
 
@@ -362,7 +362,7 @@ describe("StakingPlatform - Deep Pool", () => {
     expect(userRewards).to.equal("20547500000000000000");
     await expect(
       stakingPlatform.connect(accounts[7]).withdraw()
-    ).to.revertedWith("no withdraw until lockup ends");
+    ).to.revertedWith("No withdraw until lockup ends");
     await increaseTime(200 * 60 * 60 * 24);
 
     userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
@@ -377,7 +377,7 @@ describe("StakingPlatform - Deep Pool", () => {
     expect(userRewards).to.equal("0");
   });
 
-  it("Should return the amount staked after 1000 day", async () => {
+  it("Should return the amount staked after 1000 days", async () => {
     await increaseTime(1000 * 60 * 60 * 24);
 
     let user7Balance = (await token.balanceOf(addresses[7])).toString();

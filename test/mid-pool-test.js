@@ -102,7 +102,7 @@ describe("StakingPlatform - Mid Pool", () => {
     );
   });
 
-  it("Should claim rewards and stake for 365 day", async () => {
+  it("Should claim rewards and stake for 365 days", async () => {
     for (let i = 0; i < 365; i++) {
       await increaseTime(60 * 60 * 24);
 
@@ -110,7 +110,15 @@ describe("StakingPlatform - Mid Pool", () => {
     }
   }, 40000);
 
+  it("Should not withdraw residual balances before endingperiod + 1 year", async () => {
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "Withdraw 1year after endPeriod"
+    );
+  });
+
   it("Should withdraw residual balances", async () => {
+    // increase time by 1 year
+    await increaseTime(365 * 60 * 60 * 24);
     const balanceStakingBefore = String(
       await token.balanceOf(stakingPlatform.address)
     ).slice(0, 8);

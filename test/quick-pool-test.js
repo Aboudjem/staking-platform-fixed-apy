@@ -232,7 +232,7 @@ describe("StakingPlatform - Quick Pool", () => {
 
   it("Should fail withdraw tokens before ending period", async () => {
     await expect(stakingPlatform.withdraw()).to.revertedWith(
-      "no withdraw until lockup ends"
+      "No withdraw until lockup ends"
     );
   });
 
@@ -246,7 +246,7 @@ describe("StakingPlatform - Quick Pool", () => {
     expect(userRewards).to.equal("2466181506849315068");
     await expect(
       stakingPlatform.connect(accounts[7]).withdraw()
-    ).to.revertedWith("no withdraw until lockup ends");
+    ).to.revertedWith("No withdraw until lockup ends");
   });
 
   it("Should withdraw tokens after lockup period", async () => {
@@ -264,7 +264,7 @@ describe("StakingPlatform - Quick Pool", () => {
     expect(userRewards).to.equal("0");
   });
 
-  it("Should return the amount staked after 185 day (total 366 passed days)", async () => {
+  it("Should return the amount staked after 185 days (total 366 passed days)", async () => {
     await increaseTime(184 * 60 * 60 * 24);
 
     let user7Balance = (await token.balanceOf(addresses[7])).toString();
@@ -429,7 +429,15 @@ describe("StakingPlatform - Quick Pool", () => {
     }
   });
 
+  it("Should not withdraw residual balances before endingperiod + 1 year", async () => {
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "Withdraw 1year after endPeriod"
+    );
+  });
+
   it("Should withdraw residual balances", async () => {
+    // increase time by 1 year
+    await increaseTime(365 * 60 * 60 * 24);
     expect(
       (await token.balanceOf(stakingPlatform.address)).toString()
     ).to.equal("3746073698144977168949772");
