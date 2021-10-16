@@ -108,7 +108,7 @@ describe("StakingPlatform - Mid Pool", () => {
 
       await claimAndStake(accounts[1], token, stakingPlatform);
     }
-  }, 40000);
+  }, 60000);
 
   it("Should not withdraw residual balances before endingperiod + 1 year", async () => {
     await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
