@@ -509,7 +509,7 @@ describe("StakingPlatform - Deep Pool", () => {
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
       "8250000000000000000000"
     );
-    for (let i = 0; i <= 7; i++) {
+    for (let i = 0; i <= 8; i++) {
       await stakingPlatform.connect(accounts[i]).withdraw();
     }
 
@@ -534,9 +534,9 @@ describe("StakingPlatform - Deep Pool", () => {
   });
 
   it("Should return the amount staked once staking finished and withdrew", async () => {
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 8; i++) {
       expect(
-        (await stakingPlatform.connect(accounts[1]).amountStaked()).toString()
+        (await stakingPlatform.connect(accounts[i]).amountStaked()).toString()
       ).to.equal("0");
     }
   });

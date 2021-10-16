@@ -422,9 +422,9 @@ describe("StakingPlatform - Quick Pool", () => {
   });
 
   it("Should return the amount staked once staking finished and withdrew", async () => {
-    for (let i = 1; i <= 8; i++) {
+    for (let i = 0; i <= 8; i++) {
       expect(
-        (await stakingPlatform.connect(accounts[1]).amountStaked()).toString()
+        (await stakingPlatform.connect(accounts[i]).amountStaked()).toString()
       ).to.equal("0");
     }
   });
