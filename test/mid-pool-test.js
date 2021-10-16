@@ -1,7 +1,7 @@
 const { n18, increaseTime, claimAndStake } = require("./helpers");
 const { expect } = require("chai");
 
-describe("StakingPlatform", () => {
+describe("StakingPlatform - Mid Pool", () => {
   let token;
   let stakingPlatform;
   let accounts;
@@ -102,15 +102,66 @@ describe("StakingPlatform", () => {
     );
   });
 
-  it("Should claim rewards and stake for 365 day", async () => {
-    for (let i = 0; i < 365; i++) {
+  it("Should claim rewards and stake for 183 days", async () => {
+    for (let i = 0; i < 183; i++) {
       await increaseTime(60 * 60 * 24);
 
       await claimAndStake(accounts[1], token, stakingPlatform);
     }
-  }, 40000);
+  }, 100000);
+
+  it("Should claim rewards and stake for 182 (total 1year) days", async () => {
+    for (let i = 0; i < 182; i++) {
+      await increaseTime(60 * 60 * 24);
+
+      await claimAndStake(accounts[1], token, stakingPlatform);
+    }
+  }, 100000);
+
+  it("Should not withdraw residual balances before endingperiod + 1 year", async () => {
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "Withdraw 1year after endPeriod"
+    );
+  });
+
+  it("Should withdraw residual balances", async () => {
+    // increase time by 1 year
+    await increaseTime(365 * 60 * 60 * 24);
+    const balanceStakingBefore = String(
+      await token.balanceOf(stakingPlatform.address)
+    ).slice(0, 8);
+    const balanceOwnerBefore = String(
+      await token.balanceOf(addresses[0])
+    ).slice(0, 8);
+    expect(balanceStakingBefore).to.equal("42499152");
+    expect(balanceOwnerBefore).to.equal("99575000");
+
+    await stakingPlatform.withdrawResidualBalance();
+
+    const balanceStakingAfter = String(
+      await token.balanceOf(stakingPlatform.address)
+    ).slice(0, 8);
+    const balanceOwnerAfter = String(await token.balanceOf(addresses[0])).slice(
+      0,
+      8
+    );
+    expect(balanceStakingAfter).to.equal("21354005");
+    expect(balanceOwnerAfter.toString()).to.equal("99978637");
+  });
+
+  it("Should fail withdraw initial deposit after withdrawResidualBalance", async () => {
+    // Success enough balance
+    await stakingPlatform.connect(accounts[1]).withdraw();
+
+    // Fails not enough balance
+    await expect(
+      stakingPlatform.connect(accounts[2]).withdraw()
+    ).to.revertedWith("ERC20: transfer amount exceeds balance");
+  });
 
   it("Should withdraw initial deposit", async () => {
+    await token.transfer(stakingPlatform.address, n18("1000000"));
+
     await stakingPlatform.connect(accounts[1]).withdraw();
     await stakingPlatform.connect(accounts[2]).withdraw();
 
@@ -119,6 +170,16 @@ describe("StakingPlatform", () => {
 
     expect((await token.balanceOf(addresses[2])).toString()).to.equal(
       "112000000000000000000000"
+    );
+  });
+
+  it("Should withdraw residual after tokens sent to contract", async () => {
+    await stakingPlatform.withdrawResidualBalance();
+  });
+
+  it("Should fail withdraw residual if no residual balance", async () => {
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "No residual Balance to withdraw"
     );
   });
 });

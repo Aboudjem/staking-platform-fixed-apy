@@ -1,7 +1,7 @@
 const { n18, increaseTime } = require("./helpers");
 const { expect } = require("chai");
 
-describe("StakingPlatform", () => {
+describe("StakingPlatform - Deep Pool", () => {
   let token;
   let stakingPlatform;
   let accounts;
@@ -81,7 +81,7 @@ describe("StakingPlatform", () => {
   });
 
   it("Should deposit to staking platform", async () => {
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 8; i++) {
       const balance = await token.balanceOf(addresses[i]);
       await token
         .connect(accounts[i])
@@ -335,9 +335,15 @@ describe("StakingPlatform", () => {
     );
   });
 
+  it("Should fail withdraw residual before ending period", async () => {
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "Withdraw 1year after endPeriod"
+    );
+  });
+
   it("Should fail withdraw tokens before ending period", async () => {
     await expect(stakingPlatform.withdraw()).to.revertedWith(
-      "Withdrawal unable before ending"
+      "No withdraw until lockup ends"
     );
   });
 
@@ -356,7 +362,7 @@ describe("StakingPlatform", () => {
     expect(userRewards).to.equal("20547500000000000000");
     await expect(
       stakingPlatform.connect(accounts[7]).withdraw()
-    ).to.revertedWith("Withdrawal unable before ending");
+    ).to.revertedWith("No withdraw until lockup ends");
     await increaseTime(200 * 60 * 60 * 24);
 
     userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
@@ -371,7 +377,7 @@ describe("StakingPlatform", () => {
     expect(userRewards).to.equal("0");
   });
 
-  it("Should return the amount staked after 1000 day", async () => {
+  it("Should return the amount staked after 1000 days", async () => {
     await increaseTime(1000 * 60 * 60 * 24);
 
     let user7Balance = (await token.balanceOf(addresses[7])).toString();
@@ -503,7 +509,7 @@ describe("StakingPlatform", () => {
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
       "8250000000000000000000"
     );
-    for (let i = 0; i <= 7; i++) {
+    for (let i = 0; i <= 8; i++) {
       await stakingPlatform.connect(accounts[i]).withdraw();
     }
 
@@ -527,10 +533,39 @@ describe("StakingPlatform", () => {
     );
   });
 
+  it("Should withdraw residual balances", async () => {
+    expect(
+      (await token.balanceOf(stakingPlatform.address)).toString()
+    ).to.equal("4155609587500000000000000");
+    expect((await token.balanceOf(addresses[0])).toString()).to.equal(
+      "992868000000000000000000000"
+    );
+
+    await token.transfer(
+      stakingPlatform.address,
+      "120000000000000000000000000"
+    );
+
+    await stakingPlatform.withdrawResidualBalance();
+
+    expect(
+      (await token.balanceOf(stakingPlatform.address)).toString()
+    ).to.equal("0");
+    expect((await token.balanceOf(addresses[0])).toString()).to.equal(
+      "997023609587500000000000000"
+    );
+  });
+
+  it("Should fail withdraw residual if nothing to withdraw", async () => {
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "No residual Balance to withdraw"
+    );
+  });
+
   it("Should return the amount staked once staking finished and withdrew", async () => {
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 8; i++) {
       expect(
-        (await stakingPlatform.connect(accounts[1]).amountStaked()).toString()
+        (await stakingPlatform.connect(accounts[i]).amountStaked()).toString()
       ).to.equal("0");
     }
   });
