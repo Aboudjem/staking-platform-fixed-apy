@@ -144,6 +144,8 @@ describe("StakingPlatform - Mid Pool", () => {
   });
 
   it("Should withdraw initial deposit", async () => {
+    await token.transfer(stakingPlatform.address, n18("1000000"));
+
     await stakingPlatform.connect(accounts[1]).withdraw();
     await stakingPlatform.connect(accounts[2]).withdraw();
 
@@ -155,8 +157,9 @@ describe("StakingPlatform - Mid Pool", () => {
     );
   });
 
-  it("Should withdraw residual balances", async () => {
+  it("Should withdraw residual after tokens sent to contract", async () => {
     await stakingPlatform.withdrawResidualBalance();
+  });
 
   it("Should fail withdraw residual if no residual balance", async () => {
     await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
