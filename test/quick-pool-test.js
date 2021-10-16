@@ -252,12 +252,12 @@ describe("StakingPlatform - Quick Pool", () => {
   it("Should withdraw tokens after lockup period", async () => {
     await increaseTime(180 * 60 * 60 * 24);
 
-    userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
+    let userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
     expect(userRewards).to.equal("446301826484018264840");
 
     await stakingPlatform.connect(accounts[7]).withdraw();
 
-    userBalance = (await token.balanceOf(addresses[7])).toString();
+    const userBalance = (await token.balanceOf(addresses[7])).toString();
     userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
 
     expect(userBalance).to.equal("10446301855022831050228");
