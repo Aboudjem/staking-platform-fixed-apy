@@ -8,8 +8,17 @@ contract StakingPlatformTester is StakingPlatform {
         address _token,
         uint8 _fixedAPY,
         uint _durationInDays,
-        uint _maxStaking
-    ) StakingPlatform(_token, _fixedAPY, _durationInDays, _maxStaking) {}
+        uint _lockupDurationInDays,
+        uint _stakingMax
+    )
+        StakingPlatform(
+            _token,
+            _fixedAPY,
+            _durationInDays,
+            _lockupDurationInDays,
+            _stakingMax
+        )
+    {}
 
     function setPrecision(uint _precision) public {
         precision = 10**_precision;
