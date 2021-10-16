@@ -133,6 +133,16 @@ describe("StakingPlatform - Mid Pool", () => {
     expect(balanceOwnerAfter.toString()).to.equal("99978637");
   });
 
+  it("Should fail withdraw initial deposit after withdrawResidualBalance", async () => {
+    // Success enough balance
+    await stakingPlatform.connect(accounts[1]).withdraw();
+
+    // Fails not enough balance
+    await expect(
+      stakingPlatform.connect(accounts[2]).withdraw()
+    ).to.revertedWith("ERC20: transfer amount exceeds balance");
+  });
+
   it("Should withdraw initial deposit", async () => {
     await stakingPlatform.connect(accounts[1]).withdraw();
     await stakingPlatform.connect(accounts[2]).withdraw();
@@ -148,6 +158,7 @@ describe("StakingPlatform - Mid Pool", () => {
   it("Should withdraw residual balances", async () => {
     await stakingPlatform.withdrawResidualBalance();
 
+  it("Should fail withdraw residual if no residual balance", async () => {
     await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
       "No residual Balance to withdraw"
     );

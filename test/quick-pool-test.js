@@ -447,6 +447,12 @@ describe("StakingPlatform - Quick Pool", () => {
     );
   });
 
+  it("Should fail withdraw residual if nothing to withdraw", async () => {
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "No residual Balance to withdraw"
+    );
+  });
+
   it("Should fail deposit after staking ended", async () => {
     await token.connect(accounts[1]).approve(stakingPlatform.address, "1000");
     await expect(
