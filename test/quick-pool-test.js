@@ -232,7 +232,7 @@ describe("StakingPlatform", () => {
 
   it("Should fail withdraw tokens before ending period", async () => {
     await expect(stakingPlatform.withdraw()).to.revertedWith(
-      "Withdrawal unable before ending"
+      "no withdraw until lockup ends"
     );
   });
 
@@ -246,7 +246,7 @@ describe("StakingPlatform", () => {
     expect(userRewards).to.equal("2466181506849315068");
     await expect(
       stakingPlatform.connect(accounts[7]).withdraw()
-    ).to.revertedWith("Withdrawal unable before ending");
+    ).to.revertedWith("no withdraw until lockup ends");
   });
 
   it("Should withdraw tokens after lockup period", async () => {

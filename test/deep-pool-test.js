@@ -81,7 +81,7 @@ describe("StakingPlatform", () => {
   });
 
   it("Should deposit to staking platform", async () => {
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 8; i++) {
       const balance = await token.balanceOf(addresses[i]);
       await token
         .connect(accounts[i])
@@ -343,7 +343,7 @@ describe("StakingPlatform", () => {
 
   it("Should fail withdraw tokens before ending period", async () => {
     await expect(stakingPlatform.withdraw()).to.revertedWith(
-      "Withdrawal unable before ending"
+      "no withdraw until lockup ends"
     );
   });
 
@@ -362,7 +362,7 @@ describe("StakingPlatform", () => {
     expect(userRewards).to.equal("20547500000000000000");
     await expect(
       stakingPlatform.connect(accounts[7]).withdraw()
-    ).to.revertedWith("Withdrawal unable before ending");
+    ).to.revertedWith("no withdraw until lockup ends");
     await increaseTime(200 * 60 * 60 * 24);
 
     userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
