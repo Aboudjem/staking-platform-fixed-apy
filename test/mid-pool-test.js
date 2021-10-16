@@ -110,6 +110,29 @@ describe("StakingPlatform - Mid Pool", () => {
     }
   }, 40000);
 
+  it("Should withdraw residual balances", async () => {
+    const balanceStakingBefore = String(
+      await token.balanceOf(stakingPlatform.address)
+    ).slice(0, 8);
+    const balanceOwnerBefore = String(
+      await token.balanceOf(addresses[0])
+    ).slice(0, 8);
+    expect(balanceStakingBefore).to.equal("42499152");
+    expect(balanceOwnerBefore).to.equal("99575000");
+
+    await stakingPlatform.withdrawResidualBalance();
+
+    const balanceStakingAfter = String(
+      await token.balanceOf(stakingPlatform.address)
+    ).slice(0, 8);
+    const balanceOwnerAfter = String(await token.balanceOf(addresses[0])).slice(
+      0,
+      8
+    );
+    expect(balanceStakingAfter).to.equal("21354005");
+    expect(balanceOwnerAfter.toString()).to.equal("99978637");
+  });
+
   it("Should withdraw initial deposit", async () => {
     await stakingPlatform.connect(accounts[1]).withdraw();
     await stakingPlatform.connect(accounts[2]).withdraw();

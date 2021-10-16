@@ -533,6 +533,35 @@ describe("StakingPlatform - Deep Pool", () => {
     );
   });
 
+  it("Should withdraw residual balances", async () => {
+    expect(
+      (await token.balanceOf(stakingPlatform.address)).toString()
+    ).to.equal("4155609587500000000000000");
+    expect((await token.balanceOf(addresses[0])).toString()).to.equal(
+      "992868000000000000000000000"
+    );
+
+    await token.transfer(
+      stakingPlatform.address,
+      "120000000000000000000000000"
+    );
+
+    await stakingPlatform.withdrawResidualBalance();
+
+    expect(
+      (await token.balanceOf(stakingPlatform.address)).toString()
+    ).to.equal("0");
+    expect((await token.balanceOf(addresses[0])).toString()).to.equal(
+      "997023609587500000000000000"
+    );
+  });
+
+  it("Should fail withdraw residual if nothing to withdraw", async () => {
+    await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
+      "No residual Balance to withdraw"
+    );
+  });
+
   it("Should return the amount staked once staking finished and withdrew", async () => {
     for (let i = 1; i <= 8; i++) {
       expect(

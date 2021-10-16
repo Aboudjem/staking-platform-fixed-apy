@@ -429,6 +429,24 @@ describe("StakingPlatform - Quick Pool", () => {
     }
   });
 
+  it("Should withdraw residual balances", async () => {
+    expect(
+      (await token.balanceOf(stakingPlatform.address)).toString()
+    ).to.equal("3746073698144977168949772");
+    expect((await token.balanceOf(addresses[0])).toString()).to.equal(
+      "993658000000000000000000000"
+    );
+
+    await stakingPlatform.withdrawResidualBalance();
+
+    expect(
+      (await token.balanceOf(stakingPlatform.address)).toString()
+    ).to.equal("0");
+    expect((await token.balanceOf(addresses[0])).toString()).to.equal(
+      "997404073698144977168949772"
+    );
+  });
+
   it("Should fail deposit after staking ended", async () => {
     await token.connect(accounts[1]).approve(stakingPlatform.address, "1000");
     await expect(
