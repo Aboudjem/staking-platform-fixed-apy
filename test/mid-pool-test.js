@@ -102,8 +102,16 @@ describe("StakingPlatform - Mid Pool", () => {
     );
   });
 
-  it("Should claim rewards and stake for 365 days", async () => {
-    for (let i = 0; i < 365; i++) {
+  it("Should claim rewards and stake for 183 days", async () => {
+    for (let i = 0; i < 183; i++) {
+      await increaseTime(60 * 60 * 24);
+
+      await claimAndStake(accounts[1], token, stakingPlatform);
+    }
+  }, 100000);
+
+  it("Should claim rewards and stake for 182 (total 1year) days", async () => {
+    for (let i = 0; i < 182; i++) {
       await increaseTime(60 * 60 * 24);
 
       await claimAndStake(accounts[1], token, stakingPlatform);
