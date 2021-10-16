@@ -1,7 +1,7 @@
 const { n18, increaseTime } = require("./helpers");
 const { expect } = require("chai");
 
-describe("StakingPlatform", () => {
+describe("StakingPlatform - Quick Pool", () => {
   let token;
   let stakingPlatform;
   let accounts;
