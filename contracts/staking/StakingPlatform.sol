@@ -93,7 +93,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     function withdraw() external override {
         require(
             block.timestamp >= lockupPeriod,
-            "Withdrawal unable before ending"
+            "no withdraw until lockup ends"
         );
         stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
         if (stakeRewardsToClaim[msg.sender] > 0) {
