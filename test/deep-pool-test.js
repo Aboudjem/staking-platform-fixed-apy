@@ -66,7 +66,7 @@ describe("StakingPlatform - Deep Pool", () => {
       token.address,
       25,
       365,
-      200,
+      365,
       n18("20000000")
     );
     await stakingPlatform.deployed();
@@ -354,47 +354,48 @@ describe("StakingPlatform - Deep Pool", () => {
     );
   });
 
-  it("Should withdraw tokens after lockup period", async () => {
-    let userBalance = (await token.balanceOf(addresses[7])).toString();
+  it("Should not withdraw tokens before lockup period", async () => {
+    const userBalance = (await token.balanceOf(addresses[7])).toString();
     expect(userBalance).to.equal("0");
 
-    let userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
+    const userRewards = (
+      await stakingPlatform.rewardOf(addresses[7])
+    ).toString();
     expect(userRewards).to.equal("20547500000000000000");
     await expect(
       stakingPlatform.connect(accounts[7]).withdraw()
     ).to.revertedWith("No withdraw until lockup ends");
+  });
+
+  it("Should not withdraw tokens after 200days lockup still active", async () => {
+    await increaseTime(200 * 60 * 60 * 24);
+    const userRewards = (
+      await stakingPlatform.rewardOf(addresses[7])
+    ).toString();
+    expect(userRewards).to.equal("1390412500000000000000");
+
+    await expect(
+      stakingPlatform.connect(accounts[7]).withdraw()
+    ).to.revertedWith("No withdraw until lockup ends");
+  });
+
+  it("Should withdraw tokens after ending period", async () => {
     await increaseTime(200 * 60 * 60 * 24);
 
-    userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
-    expect(userRewards).to.equal("1390412500000000000000");
+    let userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
+    expect(userRewards).to.equal("2500000000000000000000");
 
     await stakingPlatform.connect(accounts[7]).withdraw();
 
-    userBalance = (await token.balanceOf(addresses[7])).toString();
+    const userBalance = (await token.balanceOf(addresses[7])).toString();
     userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
 
-    expect(userBalance).to.equal("11390412500000000000000");
+    expect(userBalance).to.equal("12500000000000000000000");
     expect(userRewards).to.equal("0");
   });
 
   it("Should return the amount staked after 1000 days", async () => {
     await increaseTime(1000 * 60 * 60 * 24);
-
-    let user7Balance = (await token.balanceOf(addresses[7])).toString();
-    expect(user7Balance).to.equal("11390412500000000000000");
-
-    let user7rewards = (
-      await stakingPlatform.rewardOf(addresses[7])
-    ).toString();
-    expect(user7rewards).to.equal("0");
-
-    await stakingPlatform.connect(accounts[7]).withdraw();
-    user7Balance = (await token.balanceOf(addresses[7])).toString();
-
-    expect(user7Balance).to.equal("11390412500000000000000");
-
-    user7rewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
-    expect(user7rewards).to.equal("0");
 
     await stakingPlatform.setPrecision(28);
     const user1 = (
@@ -536,7 +537,7 @@ describe("StakingPlatform - Deep Pool", () => {
   it("Should withdraw residual balances", async () => {
     expect(
       (await token.balanceOf(stakingPlatform.address)).toString()
-    ).to.equal("4155609587500000000000000");
+    ).to.equal("4154500000000000000000000");
     expect((await token.balanceOf(addresses[0])).toString()).to.equal(
       "992868000000000000000000000"
     );
@@ -552,11 +553,12 @@ describe("StakingPlatform - Deep Pool", () => {
       (await token.balanceOf(stakingPlatform.address)).toString()
     ).to.equal("0");
     expect((await token.balanceOf(addresses[0])).toString()).to.equal(
-      "997023609587500000000000000"
+      "997022500000000000000000000"
     );
   });
 
-  it("Should fail withdraw residual if nothing to withdraw", async () => {
+  it("Should fail withdraw residual if nothing to withdraw after increasing 1000days", async () => {
+    await increaseTime(1000 * 24 * 60 * 60);
     await expect(stakingPlatform.withdrawResidualBalance()).to.revertedWith(
       "No residual Balance to withdraw"
     );
