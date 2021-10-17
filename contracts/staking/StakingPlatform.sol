@@ -14,6 +14,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     IERC20 public immutable token;
 
     uint8 public immutable fixedAPY;
+
     uint public immutable stakingDuration;
     uint public immutable lockupDuration;
     uint public immutable stakingMax;
@@ -117,7 +118,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             "Withdraw 1year after endPeriod"
         );
 
-        uint balance = IERC20(token).balanceOf(address(this));
+        uint balance = token.balanceOf(address(this));
         uint residualBalance = balance - (totalStaked);
         require(residualBalance > 0, "No residual Balance to withdraw");
         token.safeTransfer(owner(), residualBalance);
