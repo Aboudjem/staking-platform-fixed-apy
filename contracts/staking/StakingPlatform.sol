@@ -4,13 +4,17 @@ pragma solidity =0.8.9;
 import "./IStakingPlatform.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /// @author RetreebInc
 /// @title Staking Platform with fixed APY and lockup
 contract StakingPlatform is IStakingPlatform, Ownable {
+    using SafeERC20 for IERC20;
+
     IERC20 public immutable token;
 
     uint8 public immutable fixedAPY;
+
     uint public immutable stakingDuration;
     uint public immutable lockupDuration;
     uint public immutable stakingMax;
@@ -19,7 +23,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     uint public lockupPeriod;
     uint public endPeriod;
 
-    uint private totalStaked = 0;
+    uint private totalStaked;
     uint internal precision = 1E6;
 
     mapping(address => uint) public staked;
@@ -76,10 +80,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         if (stakeRewardsToClaim[msg.sender] > 0) {
             claimRewards();
         }
-        require(
-            token.transferFrom(msg.sender, address(this), amount),
-            "ERC20: transferFrom failed"
-        );
+        token.safeTransferFrom(msg.sender, address(this), amount);
         staked[msg.sender] += amount;
         totalStaked += amount;
         emit Deposit(msg.sender, amount);
@@ -101,7 +102,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         totalStaked -= staked[msg.sender];
         uint stakedBalance = staked[msg.sender];
         staked[msg.sender] = 0;
-        token.transfer(msg.sender, stakedBalance);
+        token.safeTransfer(msg.sender, stakedBalance);
         emit Withdraw(msg.sender, stakedBalance);
     }
 
@@ -117,10 +118,10 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             "Withdraw 1year after endPeriod"
         );
 
-        uint balance = IERC20(token).balanceOf(address(this));
+        uint balance = token.balanceOf(address(this));
         uint residualBalance = balance - (totalStaked);
         require(residualBalance > 0, "No residual Balance to withdraw");
-        IERC20(token).transfer(owner(), residualBalance);
+        token.safeTransfer(owner(), residualBalance);
     }
 
     /**
@@ -166,7 +167,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         claimedRewards[msg.sender] += _calculateRewards(msg.sender);
         uint stakedRewards = stakeRewardsToClaim[msg.sender];
         stakeRewardsToClaim[msg.sender] = 0;
-        token.transfer(msg.sender, stakedRewards);
+        token.safeTransfer(msg.sender, stakedRewards);
         emit Claim(msg.sender, stakedRewards);
     }
 
