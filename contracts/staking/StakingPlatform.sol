@@ -22,7 +22,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     uint public lockupPeriod;
     uint public endPeriod;
 
-    uint private totalStaked = 0;
+    uint private totalStaked;
     uint internal precision = 1E6;
 
     mapping(address => uint) public staked;
