@@ -76,14 +76,20 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             totalStaked + amount <= stakingMax,
             "Amount staked exceeds MaxStake"
         );
-        stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
-        if (stakeRewardsToClaim[msg.sender] > 0) {
+
+        uint rewards = _calculateRewards(_msgSender());
+        if (rewards > 0) {
             claimRewards();
         }
-        token.safeTransferFrom(msg.sender, address(this), amount);
-        staked[msg.sender] += amount;
-        totalStaked += amount;
-        emit Deposit(msg.sender, amount);
+        uint totalAmount = amount + rewards;
+        require(
+            token.allowance(_msgSender(), address(this)) >= totalAmount,
+            "Increase allowance"
+        );
+        token.safeTransferFrom(_msgSender(), address(this), totalAmount);
+        staked[_msgSender()] += totalAmount;
+        totalStaked += totalAmount;
+        emit Deposit(_msgSender(), totalAmount);
     }
 
     /**
@@ -95,15 +101,15 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             block.timestamp >= lockupPeriod,
             "No withdraw until lockup ends"
         );
-        stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
-        if (stakeRewardsToClaim[msg.sender] > 0) {
+        stakeRewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
+        if (stakeRewardsToClaim[_msgSender()] > 0) {
             claimRewards();
         }
-        totalStaked -= staked[msg.sender];
-        uint stakedBalance = staked[msg.sender];
-        staked[msg.sender] = 0;
-        token.safeTransfer(msg.sender, stakedBalance);
-        emit Withdraw(msg.sender, stakedBalance);
+        totalStaked -= staked[_msgSender()];
+        uint stakedBalance = staked[_msgSender()];
+        staked[_msgSender()] = 0;
+        token.safeTransfer(_msgSender(), stakedBalance);
+        emit Withdraw(_msgSender(), stakedBalance);
     }
 
     /**
@@ -130,7 +136,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @return uint amount of the total deposited Tokens by the caller
      */
     function amountStaked() external view override returns (uint) {
-        return staked[msg.sender];
+        return staked[_msgSender()];
     }
 
     /**
@@ -161,14 +167,15 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @notice function that claims pending rewards
      * @dev transfer the pending rewards to the user address
      */
-    function claimRewards() public override {
-        stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
-        require(stakeRewardsToClaim[msg.sender] > 0, "Nothing to claim");
-        claimedRewards[msg.sender] += _calculateRewards(msg.sender);
-        uint stakedRewards = stakeRewardsToClaim[msg.sender];
-        stakeRewardsToClaim[msg.sender] = 0;
-        token.safeTransfer(msg.sender, stakedRewards);
-        emit Claim(msg.sender, stakedRewards);
+    function claimRewards() public override returns (uint) {
+        stakeRewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
+        require(stakeRewardsToClaim[_msgSender()] > 0, "Nothing to claim");
+        claimedRewards[_msgSender()] += _calculateRewards(_msgSender());
+        uint stakedRewards = stakeRewardsToClaim[_msgSender()];
+        stakeRewardsToClaim[_msgSender()] = 0;
+        token.safeTransfer(_msgSender(), stakedRewards);
+        emit Claim(_msgSender(), stakedRewards);
+        return stakedRewards;
     }
 
     /**
