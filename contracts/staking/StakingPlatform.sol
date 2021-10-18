@@ -81,10 +81,15 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         if (rewards > 0) {
             claimRewards();
         }
-        token.safeTransferFrom(msg.sender, address(this), amount);
-        staked[msg.sender] += amount;
-        totalStaked += amount;
-        emit Deposit(msg.sender, amount);
+        uint totalAmount = amount + rewards;
+        require(
+            token.allowance(_msgSender(), address(this)) >= totalAmount,
+            "Increase allowance"
+        );
+        token.safeTransferFrom(_msgSender(), address(this), totalAmount);
+        staked[_msgSender()] += totalAmount;
+        totalStaked += totalAmount;
+        emit Deposit(_msgSender(), totalAmount);
     }
 
     /**
