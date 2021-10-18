@@ -76,8 +76,9 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             totalStaked + amount <= stakingMax,
             "Amount staked exceeds MaxStake"
         );
-        stakeRewardsToClaim[msg.sender] = _calculateRewards(msg.sender);
-        if (stakeRewardsToClaim[msg.sender] > 0) {
+
+        uint rewards = _calculateRewards(_msgSender());
+        if (rewards > 0) {
             claimRewards();
         }
         token.safeTransferFrom(msg.sender, address(this), amount);
