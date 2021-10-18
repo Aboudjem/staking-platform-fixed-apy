@@ -1,4 +1,4 @@
-const { n18, increaseTime } = require("./helpers");
+const { n18, increaseTime, UINT_MAX } = require("./helpers");
 const { expect } = require("chai");
 
 describe("StakingPlatform - Deep Pool", () => {
@@ -85,7 +85,7 @@ describe("StakingPlatform - Deep Pool", () => {
       const balance = await token.balanceOf(addresses[i]);
       await token
         .connect(accounts[i])
-        .approve(stakingPlatform.address, balance);
+        .approve(stakingPlatform.address, UINT_MAX);
       await stakingPlatform.connect(accounts[i]).deposit(balance);
       expect((await token.balanceOf(addresses[i])).toString()).to.equal("0");
     }
@@ -320,18 +320,19 @@ describe("StakingPlatform - Deep Pool", () => {
   });
 
   it("Should deposit 100 000 tokens", async () => {
-    await token.approve(stakingPlatform.address, n18("100000"));
+    await token.approve(stakingPlatform.address, UINT_MAX);
     await stakingPlatform.deposit(n18("100000"));
   });
 
   it("Should deposit 900 000 tokens", async () => {
-    await token.approve(stakingPlatform.address, n18("900000"));
+    await token.approve(stakingPlatform.address, UINT_MAX);
     await stakingPlatform.deposit(n18("900000"));
   });
 
   it("Should fail deposit tokens", async () => {
+    await token.approve(stakingPlatform.address, 0);
     await expect(stakingPlatform.deposit(n18("100000"))).to.revertedWith(
-      "ERC20: transfer amount exceeds allowance"
+      "Increase allowance"
     );
   });
 
@@ -537,9 +538,9 @@ describe("StakingPlatform - Deep Pool", () => {
   it("Should withdraw residual balances", async () => {
     expect(
       (await token.balanceOf(stakingPlatform.address)).toString()
-    ).to.equal("4154500000000000000000000");
+    ).to.equal("4154448631250000000000000");
     expect((await token.balanceOf(addresses[0])).toString()).to.equal(
-      "992868000000000000000000000"
+      "992868051368750000000000000"
     );
 
     await token.transfer(
@@ -573,7 +574,7 @@ describe("StakingPlatform - Deep Pool", () => {
   });
 
   it("Should fail deposit after staking ended", async () => {
-    await token.connect(accounts[1]).approve(stakingPlatform.address, "1000");
+    await token.connect(accounts[1]).approve(stakingPlatform.address, UINT_MAX);
     await expect(
       stakingPlatform.connect(accounts[1]).deposit("1000")
     ).to.be.revertedWith("Staking period ended");

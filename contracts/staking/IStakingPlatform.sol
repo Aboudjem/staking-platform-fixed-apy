@@ -51,7 +51,7 @@ interface IStakingPlatform {
      * @notice function that claims pending rewards
      * @dev transfer the pending rewards to the user address
      */
-    function claimRewards() external;
+    function claimRewards() external returns (uint);
 
     /**
      * @dev Emitted when `amount` tokens are deposited into
