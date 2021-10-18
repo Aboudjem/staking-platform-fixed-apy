@@ -1,5 +1,8 @@
 const { utils } = require("ethers");
 
+const UINT_MAX =
+  "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+
 function n18(amount) {
   return utils.parseUnits(amount, "ether");
 }
@@ -25,4 +28,5 @@ module.exports = {
   n18,
   increaseTime,
   claimAndStake,
+  UINT_MAX,
 };
