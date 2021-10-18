@@ -1,4 +1,4 @@
-const { n18, increaseTime, claimAndStake } = require("./helpers");
+const { n18, increaseTime, claimAndStake, UINT_MAX } = require("./helpers");
 const { expect } = require("chai");
 
 describe("StakingPlatform - Mid Pool", () => {
@@ -57,12 +57,12 @@ describe("StakingPlatform - Mid Pool", () => {
 
   it("Should deposit to staking platform", async () => {
     const balance1 = await token.balanceOf(addresses[1]);
-    await token.connect(accounts[1]).approve(stakingPlatform.address, balance1);
+    await token.connect(accounts[1]).approve(stakingPlatform.address, UINT_MAX);
     await stakingPlatform.connect(accounts[1]).deposit(balance1);
     expect((await token.balanceOf(addresses[1])).toString()).to.equal("0");
 
     const balance2 = await token.balanceOf(addresses[2]);
-    await token.connect(accounts[2]).approve(stakingPlatform.address, balance2);
+    await token.connect(accounts[2]).approve(stakingPlatform.address, UINT_MAX);
     await stakingPlatform.connect(accounts[2]).deposit(balance2);
     expect((await token.balanceOf(addresses[2])).toString()).to.equal("0");
   });
@@ -96,7 +96,7 @@ describe("StakingPlatform - Mid Pool", () => {
   });
 
   it("Should revert if exceed the max staking amount", async () => {
-    await token.approve(stakingPlatform.address, n18("50000000"));
+    await token.approve(stakingPlatform.address, UINT_MAX);
     await expect(stakingPlatform.deposit(n18("50000000"))).to.revertedWith(
       "Amount staked exceeds MaxStake"
     );
