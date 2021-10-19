@@ -200,4 +200,31 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         }
         return (precision * stakingDuration) / stakingDuration;
     }
+
+    /**
+     * @notice function that claims pending rewards
+     * @dev transfer the pending rewards to the user address
+     */
+    function _claimRewards() private {
+        _updateRewards();
+
+        uint _rewardsToClaim = rewardsToClaim[_msgSender()];
+        require(_rewardsToClaim > 0, "Nothing to claim");
+
+        // remove rewards to claim, add them to claimed Rewards and transfer them to the user
+        rewardsToClaim[_msgSender()] = 0;
+        claimedRewards[_msgSender()] += _rewardsToClaim;
+
+        token.safeTransfer(_msgSender(), _rewardsToClaim);
+        emit Claim(_msgSender(), _rewardsToClaim);
+    }
+
+    /**
+     * @notice function that update pending rewards
+     * and shift them to rewardsToClaim
+     * @dev transfer the pending rewards to the user address
+     */
+    function _updateRewards() private {
+        rewardsToClaim[_msgSender()] += _calculateRewards(_msgSender());
+    }
 }
