@@ -225,9 +225,9 @@ describe("StakingPlatform - Quick Pool", () => {
   });
 
   it("Should fail deposit tokens", async () => {
-    await token.approve(stakingPlatform.address, n18("100000"));
+    await token.approve(stakingPlatform.address, n18("9000"));
     await expect(stakingPlatform.deposit(n18("100000"))).to.revertedWith(
-      "Increase allowance"
+      "ERC20: transfer amount exceeds allowance"
     );
   });
 
@@ -441,9 +441,9 @@ describe("StakingPlatform - Quick Pool", () => {
     await increaseTime(365 * 60 * 60 * 24);
     expect(
       (await token.balanceOf(stakingPlatform.address)).toString()
-    ).to.equal("3746071478604452054794522");
+    ).to.equal("3746073698116438356164384");
     expect((await token.balanceOf(addresses[0])).toString()).to.equal(
-      "993658002219511986301369862"
+      "993658000000000000000000000"
     );
 
     await stakingPlatform.withdrawResidualBalance();
