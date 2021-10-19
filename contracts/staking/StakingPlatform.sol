@@ -162,15 +162,8 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @notice function that claims pending rewards
      * @dev transfer the pending rewards to the user address
      */
-    function claimRewards() public override returns (uint) {
-        stakeRewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
-        require(stakeRewardsToClaim[_msgSender()] > 0, "Nothing to claim");
-        claimedRewards[_msgSender()] += _calculateRewards(_msgSender());
-        uint stakedRewards = stakeRewardsToClaim[_msgSender()];
-        stakeRewardsToClaim[_msgSender()] = 0;
-        token.safeTransfer(_msgSender(), stakedRewards);
-        emit Claim(_msgSender(), stakedRewards);
-        return stakedRewards;
+    function claimRewards() external override {
+        _claimRewards();
     }
 
     /**
