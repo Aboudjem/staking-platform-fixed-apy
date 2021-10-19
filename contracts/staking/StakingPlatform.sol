@@ -27,8 +27,8 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     uint internal precision = 1E6;
 
     mapping(address => uint) public staked;
-    mapping(address => uint) public stakeRewardsToClaim;
     mapping(address => uint) public claimedRewards;
+    mapping(address => uint) private rewardsToClaim;
 
     /**
      * @notice constructor contains all the parameters of the staking platform
@@ -77,19 +77,12 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             "Amount staked exceeds MaxStake"
         );
 
-        uint rewards = _calculateRewards(_msgSender());
-        if (rewards > 0) {
-            claimRewards();
-        }
-        uint totalAmount = amount + rewards;
-        require(
-            token.allowance(_msgSender(), address(this)) >= totalAmount,
-            "Increase allowance"
-        );
-        token.safeTransferFrom(_msgSender(), address(this), totalAmount);
-        staked[_msgSender()] += totalAmount;
-        totalStaked += totalAmount;
-        emit Deposit(_msgSender(), totalAmount);
+        _updateRewards();
+
+        staked[_msgSender()] += amount;
+        totalStaked += amount;
+        token.safeTransferFrom(_msgSender(), address(this), amount);
+        emit Deposit(_msgSender(), amount);
     }
 
     /**
@@ -101,14 +94,16 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             block.timestamp >= lockupPeriod,
             "No withdraw until lockup ends"
         );
-        stakeRewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
-        if (stakeRewardsToClaim[_msgSender()] > 0) {
-            claimRewards();
-        }
+
+        _updateRewards();
         totalStaked -= staked[_msgSender()];
         uint stakedBalance = staked[_msgSender()];
         staked[_msgSender()] = 0;
         token.safeTransfer(_msgSender(), stakedBalance);
+
+        if (rewardsToClaim[_msgSender()] > 0) {
+            _claimRewards();
+        }
         emit Withdraw(_msgSender(), stakedBalance);
     }
 
@@ -167,15 +162,8 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @notice function that claims pending rewards
      * @dev transfer the pending rewards to the user address
      */
-    function claimRewards() public override returns (uint) {
-        stakeRewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
-        require(stakeRewardsToClaim[_msgSender()] > 0, "Nothing to claim");
-        claimedRewards[_msgSender()] += _calculateRewards(_msgSender());
-        uint stakedRewards = stakeRewardsToClaim[_msgSender()];
-        stakeRewardsToClaim[_msgSender()] = 0;
-        token.safeTransfer(_msgSender(), stakedRewards);
-        emit Claim(_msgSender(), stakedRewards);
-        return stakedRewards;
+    function claimRewards() external override {
+        _claimRewards();
     }
 
     /**
@@ -194,7 +182,8 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         }
         return
             (((staked[stakeHolder] * fixedAPY) * _percentageTimeRemaining()) /
-                (precision * 100)) - claimedRewards[stakeHolder];
+                (precision * 100)) -
+            (claimedRewards[stakeHolder] + rewardsToClaim[stakeHolder]);
     }
 
     /**
@@ -210,5 +199,32 @@ contract StakingPlatform is IStakingPlatform, Ownable {
                 stakingDuration;
         }
         return (precision * stakingDuration) / stakingDuration;
+    }
+
+    /**
+     * @notice function that claims pending rewards
+     * @dev transfer the pending rewards to the user address
+     */
+    function _claimRewards() private {
+        _updateRewards();
+
+        uint _rewardsToClaim = rewardsToClaim[_msgSender()];
+        require(_rewardsToClaim > 0, "Nothing to claim");
+
+        // remove rewards to claim, add them to claimed Rewards and transfer them to the user
+        rewardsToClaim[_msgSender()] = 0;
+        claimedRewards[_msgSender()] += _rewardsToClaim;
+
+        token.safeTransfer(_msgSender(), _rewardsToClaim);
+        emit Claim(_msgSender(), _rewardsToClaim);
+    }
+
+    /**
+     * @notice function that update pending rewards
+     * and shift them to rewardsToClaim
+     * @dev transfer the pending rewards to the user address
+     */
+    function _updateRewards() private {
+        rewardsToClaim[_msgSender()] += _calculateRewards(_msgSender());
     }
 }
