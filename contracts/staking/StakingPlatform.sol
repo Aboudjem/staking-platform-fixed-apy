@@ -29,7 +29,6 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     mapping(address => uint) public staked;
     mapping(address => uint) public claimedRewards;
     mapping(address => uint) private rewardsToClaim;
-    mapping(address => uint) public claimedRewards;
 
     /**
      * @notice constructor contains all the parameters of the staking platform
@@ -78,19 +77,12 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             "Amount staked exceeds MaxStake"
         );
 
-        uint rewards = _calculateRewards(_msgSender());
-        if (rewards > 0) {
-            claimRewards();
-        }
-        uint totalAmount = amount + rewards;
-        require(
-            token.allowance(_msgSender(), address(this)) >= totalAmount,
-            "Increase allowance"
-        );
-        token.safeTransferFrom(_msgSender(), address(this), totalAmount);
-        staked[_msgSender()] += totalAmount;
-        totalStaked += totalAmount;
-        emit Deposit(_msgSender(), totalAmount);
+        _updateRewards();
+
+        staked[_msgSender()] += amount;
+        totalStaked += amount;
+        token.safeTransferFrom(_msgSender(), address(this), amount);
+        emit Deposit(_msgSender(), amount);
     }
 
     /**
