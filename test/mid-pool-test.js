@@ -49,9 +49,9 @@ describe("StakingPlatform - Mid Pool", () => {
 
   it("Should send tokens to staking platform", async () => {
     expect(await token.balanceOf(stakingPlatform.address)).to.equal(n18("0"));
-    await token.transfer(stakingPlatform.address, n18("4050000"));
+    await token.transfer(stakingPlatform.address, n18("35000000"));
     expect(await token.balanceOf(stakingPlatform.address)).to.equal(
-      n18("4050000")
+      n18("35000000")
     );
   });
 
@@ -133,8 +133,8 @@ describe("StakingPlatform - Mid Pool", () => {
     const balanceOwnerBefore = String(
       await token.balanceOf(addresses[0])
     ).slice(0, 7);
-    expect(balanceStakingBefore).to.equal("4249915");
-    expect(balanceOwnerBefore).to.equal("9957500");
+    expect(balanceStakingBefore).to.equal("3519991");
+    expect(balanceOwnerBefore).to.equal("9648000");
 
     await stakingPlatform.withdrawResidualBalance();
 
