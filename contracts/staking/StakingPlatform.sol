@@ -94,14 +94,16 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             block.timestamp >= lockupPeriod,
             "No withdraw until lockup ends"
         );
-        stakeRewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
-        if (stakeRewardsToClaim[_msgSender()] > 0) {
-            claimRewards();
-        }
+
+        _updateRewards();
         totalStaked -= staked[_msgSender()];
         uint stakedBalance = staked[_msgSender()];
         staked[_msgSender()] = 0;
         token.safeTransfer(_msgSender(), stakedBalance);
+
+        if (rewardsToClaim[_msgSender()] > 0) {
+            _claimRewards();
+        }
         emit Withdraw(_msgSender(), stakedBalance);
     }
 
