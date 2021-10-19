@@ -12,7 +12,7 @@ Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
 - Users should deposit their tokens before or during the staking period
 - Run `Start()` function launch the staking
 - Users can claim their rewards using `claimRewards()`
-- Once staking is finished users can withdraw their initial deposit using `withdraw()`
+- Once staking is over users can withdraw their initial deposit using `withdraw()` (`withdraw()` calls `claimRewards()`)
 
 ## Constructor
 
@@ -21,6 +21,7 @@ Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
         address _token,
         uint8 _fixedAPY,
         uint _durationInDays,
+        uint _lockDurationInDays,
         uint _maxStake
     )
 ```
@@ -28,11 +29,13 @@ Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
 - Address of the ERC20 Token to be used by the Staking platform
 - fixed APY rates (must be consistent with the maxStake)
 - Duration (e.g, 365 == 1year)
-- Maximum of tokens that can be deposited
+- Lockup duration (Impossible to withdraw until the lockup period is finish)
+- Max tokens that can be deposited by stake holders
 
 ## Examples
 
 - Staking platform is deployed with 25% of APY
+- _User1_ approve `100000 TKN`
 - _User1_ deposit `100000 TKN`
 - Staking platform starts
 - after 1 day User1 can claim `~68.4750 TKN`
