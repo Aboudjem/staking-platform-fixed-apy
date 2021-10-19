@@ -28,7 +28,7 @@ Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
 
 - Address of the ERC20 Token to be used by the Staking platform
 - fixed APY rates (must be consistent with the maxStake)
-- Duration (e.g, 365 == 1year)
+- Duration of the staking (e.g, 365 == 1year)
 - Lockup duration (Impossible to withdraw until the lockup period is finish)
 - Max tokens that can be deposited by stake holders
 
