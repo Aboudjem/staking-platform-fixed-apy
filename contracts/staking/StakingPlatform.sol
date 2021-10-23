@@ -78,6 +78,10 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             "Amount staked exceeds MaxStake"
         );
 
+        if (userStartTime[_msgSender()] == 0) {
+            userStartTime[_msgSender()] = block.timestamp;
+        }
+
         _updateRewards();
 
         staked[_msgSender()] += amount;
