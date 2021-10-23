@@ -189,8 +189,8 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             return 0;
         }
         return
-            (((staked[stakeHolder] * fixedAPY) * _percentageTimeRemaining()) /
-                (precision * 100)) -
+            (((staked[stakeHolder] * fixedAPY) *
+                _percentageTimeRemaining(stakeHolder)) / (precision * 100)) -
             (claimedRewards[stakeHolder] + rewardsToClaim[stakeHolder]);
     }
 
@@ -199,7 +199,13 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @dev the higher is the precision and the more the time remaining will be precise
      * @return uint percentage of time remaining * precision
      */
-    function _percentageTimeRemaining() internal view returns (uint) {
+    function _percentageTimeRemaining(address stakeHolder)
+        internal
+        view
+        returns (uint)
+    {
+        bool early = startPeriod > userStartTime[stakeHolder];
+        uint startTime;
         if (endPeriod > block.timestamp) {
             uint timeRemaining = endPeriod - block.timestamp;
             return
