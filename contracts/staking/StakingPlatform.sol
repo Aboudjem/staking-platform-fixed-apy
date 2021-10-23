@@ -101,6 +101,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         );
 
         _updateRewards();
+        userStartTime[_msgSender()] = 0;
         totalStaked -= staked[_msgSender()];
         uint stakedBalance = staked[_msgSender()];
         staked[_msgSender()] = 0;
@@ -109,6 +110,8 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         if (rewardsToClaim[_msgSender()] > 0) {
             _claimRewards();
         }
+        claimedRewards[_msgSender()] = 0;
+
         emit Withdraw(_msgSender(), stakedBalance);
     }
 
