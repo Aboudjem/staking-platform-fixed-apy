@@ -207,12 +207,18 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         bool early = startPeriod > userStartTime[stakeHolder];
         uint startTime;
         if (endPeriod > block.timestamp) {
-            uint timeRemaining = endPeriod - block.timestamp;
+            startTime = early ? startPeriod : userStartTime[stakeHolder];
+            uint timeRemaining = stakingDuration -
+                (block.timestamp - startTime);
             return
                 (precision * (stakingDuration - timeRemaining)) /
                 stakingDuration;
         }
-        return (precision * stakingDuration) / stakingDuration;
+
+        startTime = early
+            ? 0
+            : stakingDuration - (endPeriod - userStartTime[stakeHolder]);
+        return (precision * (stakingDuration - startTime)) / stakingDuration;
     }
 
     /**
