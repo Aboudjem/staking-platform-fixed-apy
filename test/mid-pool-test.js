@@ -91,7 +91,7 @@ describe("StakingPlatform - Mid Pool", () => {
 
   it("Should return the amount staked", async () => {
     expect(
-      (await stakingPlatform.connect(accounts[1]).amountStaked()).toString()
+      (await stakingPlatform.amountStaked(addresses[1])).toString()
     ).to.equal("100000000000000000000000");
   });
 
@@ -133,7 +133,7 @@ describe("StakingPlatform - Mid Pool", () => {
     const balanceOwnerBefore = String(
       await token.balanceOf(addresses[0])
     ).slice(0, 7);
-    expect(balanceStakingBefore).to.equal("3519991");
+    expect(balanceStakingBefore).to.equal("3519992");
     expect(balanceOwnerBefore).to.equal("9648000");
 
     await stakingPlatform.withdrawResidualBalance();
@@ -145,8 +145,8 @@ describe("StakingPlatform - Mid Pool", () => {
       0,
       7
     );
-    expect(balanceStakingAfter).to.equal("2135400");
-    expect(balanceOwnerAfter.toString()).to.equal("9997863");
+    expect(balanceStakingAfter).to.equal("2126689");
+    expect(balanceOwnerAfter.toString()).to.equal("9997872");
   });
 
   it("Should fail withdraw initial deposit after withdrawResidualBalance", async () => {
@@ -166,7 +166,7 @@ describe("StakingPlatform - Mid Pool", () => {
     await stakingPlatform.connect(accounts[2]).withdraw();
 
     const balance1 = String(await token.balanceOf(addresses[1])).slice(0, 7);
-    expect(balance1).to.equal("1136248");
+    expect(balance1).to.equal("1127430");
 
     expect((await token.balanceOf(addresses[2])).toString()).to.equal(
       "112000000000000000000000"

@@ -30,7 +30,7 @@ interface IStakingPlatform {
      * for a specific user
      * @return uint amount of the total deposited Tokens by the caller
      */
-    function amountStaked() external view returns (uint);
+    function amountStaked(address stakeHolder) external view returns (uint);
 
     /**
      * @notice function that returns the amount of total Staked tokens

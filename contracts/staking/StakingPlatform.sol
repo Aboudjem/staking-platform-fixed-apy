@@ -27,8 +27,8 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     uint internal precision = 1E6;
 
     mapping(address => uint) public staked;
-    mapping(address => uint) public claimedRewards;
     mapping(address => uint) private rewardsToClaim;
+    mapping(address => uint) private userStartTime;
 
     /**
      * @notice constructor contains all the parameters of the staking platform
@@ -76,6 +76,11 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             totalStaked + amount <= stakingMax,
             "Amount staked exceeds MaxStake"
         );
+        require(amount >= 1E18, "Amount must be greater than 1E18");
+
+        if (userStartTime[_msgSender()] == 0) {
+            userStartTime[_msgSender()] = block.timestamp;
+        }
 
         _updateRewards();
 
@@ -96,14 +101,16 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         );
 
         _updateRewards();
+        if (rewardsToClaim[_msgSender()] > 0) {
+            _claimRewards();
+        }
+
+        userStartTime[_msgSender()] = 0;
         totalStaked -= staked[_msgSender()];
         uint stakedBalance = staked[_msgSender()];
         staked[_msgSender()] = 0;
         token.safeTransfer(_msgSender(), stakedBalance);
 
-        if (rewardsToClaim[_msgSender()] > 0) {
-            _claimRewards();
-        }
         emit Withdraw(_msgSender(), stakedBalance);
     }
 
@@ -130,8 +137,13 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * for a specific user
      * @return uint amount of the total deposited Tokens by the caller
      */
-    function amountStaked() external view override returns (uint) {
-        return staked[_msgSender()];
+    function amountStaked(address stakeHolder)
+        external
+        view
+        override
+        returns (uint)
+    {
+        return staked[stakeHolder];
     }
 
     /**
@@ -180,10 +192,11 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         if (startPeriod == 0 || staked[stakeHolder] == 0) {
             return 0;
         }
+
         return
-            (((staked[stakeHolder] * fixedAPY) * _percentageTimeRemaining()) /
-                (precision * 100)) -
-            (claimedRewards[stakeHolder] + rewardsToClaim[stakeHolder]);
+            (((staked[stakeHolder] * fixedAPY) *
+                _percentageTimeRemaining(stakeHolder)) / (precision * 100)) +
+            rewardsToClaim[stakeHolder];
     }
 
     /**
@@ -191,14 +204,25 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @dev the higher is the precision and the more the time remaining will be precise
      * @return uint percentage of time remaining * precision
      */
-    function _percentageTimeRemaining() internal view returns (uint) {
+    function _percentageTimeRemaining(address stakeHolder)
+        internal
+        view
+        returns (uint)
+    {
+        bool early = startPeriod > userStartTime[stakeHolder];
+        uint startTime;
         if (endPeriod > block.timestamp) {
-            uint timeRemaining = endPeriod - block.timestamp;
+            startTime = early ? startPeriod : userStartTime[stakeHolder];
+            uint timeRemaining = stakingDuration -
+                (block.timestamp - startTime);
             return
                 (precision * (stakingDuration - timeRemaining)) /
                 stakingDuration;
         }
-        return (precision * stakingDuration) / stakingDuration;
+        startTime = early
+            ? 0
+            : stakingDuration - (endPeriod - userStartTime[stakeHolder]);
+        return (precision * (stakingDuration - startTime)) / stakingDuration;
     }
 
     /**
@@ -211,10 +235,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         uint _rewardsToClaim = rewardsToClaim[_msgSender()];
         require(_rewardsToClaim > 0, "Nothing to claim");
 
-        // remove rewards to claim, add them to claimed Rewards and transfer them to the user
         rewardsToClaim[_msgSender()] = 0;
-        claimedRewards[_msgSender()] += _rewardsToClaim;
-
         token.safeTransfer(_msgSender(), _rewardsToClaim);
         emit Claim(_msgSender(), _rewardsToClaim);
     }
@@ -225,6 +246,9 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @dev transfer the pending rewards to the user address
      */
     function _updateRewards() private {
-        rewardsToClaim[_msgSender()] += _calculateRewards(_msgSender());
+        rewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
+        userStartTime[_msgSender()] = (block.timestamp >= endPeriod)
+            ? endPeriod
+            : block.timestamp;
     }
 }

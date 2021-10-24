@@ -24,11 +24,19 @@ contract StakingPlatformTester is StakingPlatform {
         precision = 10**_precision;
     }
 
-    function calculatedReward() external view returns (uint) {
-        return _calculateRewards(msg.sender);
+    function calculatedReward(address stakeHolder)
+        external
+        view
+        returns (uint)
+    {
+        return _calculateRewards(stakeHolder);
     }
 
-    function percentageTimeRemaining() external view returns (uint) {
-        return _percentageTimeRemaining();
+    function percentageTimeRemaining(address stakeHolder)
+        external
+        view
+        returns (uint)
+    {
+        return _percentageTimeRemaining(stakeHolder);
     }
 }
