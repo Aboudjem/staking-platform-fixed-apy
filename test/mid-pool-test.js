@@ -49,9 +49,9 @@ describe("StakingPlatform - Mid Pool", () => {
 
   it("Should send tokens to staking platform", async () => {
     expect(await token.balanceOf(stakingPlatform.address)).to.equal(n18("0"));
-    await token.transfer(stakingPlatform.address, n18("4050000"));
+    await token.transfer(stakingPlatform.address, n18("35000000"));
     expect(await token.balanceOf(stakingPlatform.address)).to.equal(
-      n18("4050000")
+      n18("35000000")
     );
   });
 
