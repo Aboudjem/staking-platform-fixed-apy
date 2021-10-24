@@ -246,6 +246,9 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @dev transfer the pending rewards to the user address
      */
     function _updateRewards() private {
-        rewardsToClaim[_msgSender()] += _calculateRewards(_msgSender());
+        rewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
+        userStartTime[_msgSender()] = (block.timestamp >= endPeriod)
+            ? endPeriod
+            : block.timestamp;
     }
 }
