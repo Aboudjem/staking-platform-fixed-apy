@@ -101,6 +101,10 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         );
 
         _updateRewards();
+        if (rewardsToClaim[_msgSender()] > 0) {
+            _claimRewards();
+        }
+
         userStartTime[_msgSender()] = 0;
         totalStaked -= staked[_msgSender()];
         uint stakedBalance = staked[_msgSender()];
