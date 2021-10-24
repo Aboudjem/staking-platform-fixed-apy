@@ -187,10 +187,11 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         if (startPeriod == 0 || staked[stakeHolder] == 0) {
             return 0;
         }
+
         return
             (((staked[stakeHolder] * fixedAPY) *
-                _percentageTimeRemaining(stakeHolder)) / (precision * 100)) -
-            (claimedRewards[stakeHolder] + rewardsToClaim[stakeHolder]);
+                _percentageTimeRemaining(stakeHolder)) / (precision * 100)) +
+            rewardsToClaim[stakeHolder];
     }
 
     /**
