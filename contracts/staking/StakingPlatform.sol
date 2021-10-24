@@ -219,7 +219,6 @@ contract StakingPlatform is IStakingPlatform, Ownable {
                 (precision * (stakingDuration - timeRemaining)) /
                 stakingDuration;
         }
-
         startTime = early
             ? 0
             : stakingDuration - (endPeriod - userStartTime[stakeHolder]);
@@ -236,10 +235,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         uint _rewardsToClaim = rewardsToClaim[_msgSender()];
         require(_rewardsToClaim > 0, "Nothing to claim");
 
-        // remove rewards to claim, add them to claimed Rewards and transfer them to the user
         rewardsToClaim[_msgSender()] = 0;
-        claimedRewards[_msgSender()] += _rewardsToClaim;
-
         token.safeTransfer(_msgSender(), _rewardsToClaim);
         emit Claim(_msgSender(), _rewardsToClaim);
     }
