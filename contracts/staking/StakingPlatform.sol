@@ -111,11 +111,6 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         staked[_msgSender()] = 0;
         token.safeTransfer(_msgSender(), stakedBalance);
 
-        if (rewardsToClaim[_msgSender()] > 0) {
-            _claimRewards();
-        }
-        claimedRewards[_msgSender()] = 0;
-
         emit Withdraw(_msgSender(), stakedBalance);
     }
 
