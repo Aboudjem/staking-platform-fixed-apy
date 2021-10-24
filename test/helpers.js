@@ -2,6 +2,7 @@ const { utils } = require("ethers");
 
 const UINT_MAX =
   "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+const ONE_DAY = 86400;
 
 function n18(amount) {
   return utils.parseUnits(amount, "ether");
@@ -26,4 +27,5 @@ module.exports = {
   increaseTime,
   claimAndStake,
   UINT_MAX,
+  ONE_DAY,
 };
