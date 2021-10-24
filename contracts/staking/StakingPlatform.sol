@@ -27,7 +27,6 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     uint internal precision = 1E6;
 
     mapping(address => uint) public staked;
-    mapping(address => uint) public claimedRewards;
     mapping(address => uint) private rewardsToClaim;
     mapping(address => uint) private userStartTime;
 
