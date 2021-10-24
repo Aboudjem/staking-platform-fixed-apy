@@ -81,7 +81,7 @@ describe("StakingPlatform - Deep Pool", () => {
   });
 
   it("Should deposit to staking platform", async () => {
-    for (let i = 1; i <= 8; i++) {
+    for (let i = 1; i <= 7; i++) {
       const balance = await token.balanceOf(addresses[i]);
       await token
         .connect(accounts[i])
@@ -115,18 +115,15 @@ describe("StakingPlatform - Deep Pool", () => {
 
   it("Should return the amount staked", async () => {
     expect(
-      (await stakingPlatform.connect(accounts[1]).amountStaked()).toString()
+      (await stakingPlatform.amountStaked(addresses[1])).toString()
     ).to.equal("100000000000000000000000");
   });
 
   it("Should return and claim rewards staked after 1 day", async () => {
     await increaseTime(60 * 60 * 24);
-    expect(
-      (await stakingPlatform.percentageTimeRemaining()).toString()
-    ).to.equal("2739");
 
     const user1 = (
-      await stakingPlatform.connect(accounts[1]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[1])
     ).toString();
     expect(user1).to.equal("68475000000000000000");
     expect((await token.balanceOf(addresses[1])).toString()).to.equal("0");
@@ -135,11 +132,11 @@ describe("StakingPlatform - Deep Pool", () => {
       "68475000000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[1]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[1])).toString()
     ).to.equal("0");
 
     const user2 = (
-      await stakingPlatform.connect(accounts[2]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[2])
     ).toString();
     expect(user2).to.equal("239662500000000000000");
     expect((await token.balanceOf(addresses[2])).toString()).to.equal("0");
@@ -148,11 +145,11 @@ describe("StakingPlatform - Deep Pool", () => {
       "239662500000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[2]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[2])).toString()
     ).to.equal("0");
 
     const user3 = (
-      await stakingPlatform.connect(accounts[3]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[3])
     ).toString();
     expect(user3).to.equal("25335750000000000000");
     expect((await token.balanceOf(addresses[3])).toString()).to.equal("0");
@@ -161,11 +158,11 @@ describe("StakingPlatform - Deep Pool", () => {
       "25335750000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[3]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[3])).toString()
     ).to.equal("0");
 
     const user4 = (
-      await stakingPlatform.connect(accounts[4]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[4])
     ).toString();
     expect(user4).to.equal("1369500000000000000");
     expect((await token.balanceOf(addresses[4])).toString()).to.equal("0");
@@ -174,11 +171,11 @@ describe("StakingPlatform - Deep Pool", () => {
       "1369500000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[4]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[4])).toString()
     ).to.equal("0");
 
     const user5 = (
-      await stakingPlatform.connect(accounts[5]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[5])
     ).toString();
     expect(user5).to.equal("1266787500000000000000");
     expect((await token.balanceOf(addresses[5])).toString()).to.equal("0");
@@ -187,11 +184,11 @@ describe("StakingPlatform - Deep Pool", () => {
       "1266787500000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[5]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[5])).toString()
     ).to.equal("0");
 
     const user6 = (
-      await stakingPlatform.connect(accounts[6]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[6])
     ).toString();
     expect(user6).to.equal("22596750000000000000");
     expect((await token.balanceOf(addresses[6])).toString()).to.equal("0");
@@ -200,7 +197,7 @@ describe("StakingPlatform - Deep Pool", () => {
       "22596750000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[6]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[6])).toString()
     ).to.equal("0");
   });
 
@@ -208,93 +205,93 @@ describe("StakingPlatform - Deep Pool", () => {
     await increaseTime(60 * 60 * 24);
 
     const user1 = (
-      await stakingPlatform.connect(accounts[1]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[1])
     ).toString();
-    expect(user1).to.equal("68500000000000000000");
+    expect(user1).to.equal("68475000000000000000");
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(
       "68475000000000000000"
     );
     await stakingPlatform.connect(accounts[1]).claimRewards();
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(
-      "136975000000000000000"
+      "136950000000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[1]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[1])).toString()
     ).to.equal("0");
 
     const user2 = (
-      await stakingPlatform.connect(accounts[2]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[2])
     ).toString();
-    expect(user2).to.equal("239750000000000000000");
+    expect(user2).to.equal("239662500000000000000");
     expect((await token.balanceOf(addresses[2])).toString()).to.equal(
       "239662500000000000000"
     );
     await stakingPlatform.connect(accounts[2]).claimRewards();
     expect((await token.balanceOf(addresses[2])).toString()).to.equal(
-      "479412500000000000000"
+      "479325000000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[2]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[2])).toString()
     ).to.equal("0");
 
     const user3 = (
-      await stakingPlatform.connect(accounts[3]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[3])
     ).toString();
-    expect(user3).to.equal("25345000000000000000");
+    expect(user3).to.equal("25335750000000000000");
     expect((await token.balanceOf(addresses[3])).toString()).to.equal(
       "25335750000000000000"
     );
     await stakingPlatform.connect(accounts[3]).claimRewards();
     expect((await token.balanceOf(addresses[3])).toString()).to.equal(
-      "50680750000000000000"
+      "50671500000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[3]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[3])).toString()
     ).to.equal("0");
 
     const user4 = (
-      await stakingPlatform.connect(accounts[4]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[4])
     ).toString();
-    expect(user4).to.equal("1370000000000000000");
+    expect(user4).to.equal("1369500000000000000");
     expect((await token.balanceOf(addresses[4])).toString()).to.equal(
       "1369500000000000000"
     );
     await stakingPlatform.connect(accounts[4]).claimRewards();
     expect((await token.balanceOf(addresses[4])).toString()).to.equal(
-      "2739500000000000000"
+      "2739000000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[4]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[4])).toString()
     ).to.equal("0");
 
     const user5 = (
-      await stakingPlatform.connect(accounts[5]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[5])
     ).toString();
-    expect(user5).to.equal("1267250000000000000000");
+    expect(user5).to.equal("1266787500000000000000");
     expect((await token.balanceOf(addresses[5])).toString()).to.equal(
       "1266787500000000000000"
     );
     await stakingPlatform.connect(accounts[5]).claimRewards();
     expect((await token.balanceOf(addresses[5])).toString()).to.equal(
-      "2534037500000000000000"
+      "2533575000000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[5]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[5])).toString()
     ).to.equal("0");
 
     const user6 = (
-      await stakingPlatform.connect(accounts[6]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[6])
     ).toString();
-    expect(user6).to.equal("22605000000000000000");
+    expect(user6).to.equal("22596750000000000000");
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
       "22596750000000000000"
     );
     await stakingPlatform.connect(accounts[6]).claimRewards();
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
-      "45201750000000000000"
+      "45193500000000000000"
     );
     expect(
-      (await stakingPlatform.connect(accounts[6]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[6])).toString()
     ).to.equal("0");
   });
 
@@ -309,7 +306,7 @@ describe("StakingPlatform - Deep Pool", () => {
     const user1RewardsAfter = (
       await stakingPlatform.rewardOf(addresses[1])
     ).toString();
-    expect(user1RewardsAfter).to.equal("68500000000000000000");
+    expect(user1RewardsAfter).to.equal("68475000000000000000");
   });
 
   it("Should revert if exceed the max staking amount", async () => {
@@ -349,7 +346,7 @@ describe("StakingPlatform - Deep Pool", () => {
   });
 
   it("Should fail claiming tokens", async () => {
-    await expect(stakingPlatform.claimRewards());
+    // await expect(stakingPlatform.claimRewards());
     await expect(stakingPlatform.claimRewards()).to.revertedWith(
       "Nothing to claim"
     );
@@ -380,6 +377,13 @@ describe("StakingPlatform - Deep Pool", () => {
     ).to.revertedWith("No withdraw until lockup ends");
   });
 
+  it("Should fail claiming tokens", async () => {
+    await expect(stakingPlatform.claimRewards());
+    await expect(stakingPlatform.claimRewards()).to.revertedWith(
+      "Nothing to claim"
+    );
+  });
+
   it("Should withdraw tokens after ending period", async () => {
     await increaseTime(200 * 60 * 60 * 24);
 
@@ -400,93 +404,93 @@ describe("StakingPlatform - Deep Pool", () => {
 
     await stakingPlatform.setPrecision(28);
     const user1 = (
-      await stakingPlatform.connect(accounts[1]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[1])
     ).toString();
-    expect(user1).to.equal("24863025000000000000000");
+    expect(user1).to.equal("24863007356671740233384");
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(
-      "136975000000000000000"
+      "136950000000000000000"
     );
     await stakingPlatform.connect(accounts[1]).claimRewards();
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(
-      "25000000000000000000000"
+      "24999957356671740233384"
     );
     expect(
-      (await stakingPlatform.connect(accounts[1]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[1])).toString()
     ).to.equal("0");
 
     const user2 = (
-      await stakingPlatform.connect(accounts[2]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[2])
     ).toString();
-    expect(user2).to.equal("87020587500000000000000");
+    expect(user2).to.equal("87020522973744292237442");
     expect((await token.balanceOf(addresses[2])).toString()).to.equal(
-      "479412500000000000000"
+      "479325000000000000000"
     );
     await stakingPlatform.connect(accounts[2]).claimRewards();
     expect((await token.balanceOf(addresses[2])).toString()).to.equal(
-      "87500000000000000000000"
+      "87499847973744292237442"
     );
     expect(
-      (await stakingPlatform.connect(accounts[2]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[2])).toString()
     ).to.equal("0");
 
     const user3 = (
-      await stakingPlatform.connect(accounts[3]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[3])
     ).toString();
-    expect(user3).to.equal("9199319250000000000000");
+    expect(user3).to.equal("9199312135337392186707");
     expect((await token.balanceOf(addresses[3])).toString()).to.equal(
-      "50680750000000000000"
+      "50671500000000000000"
     );
     await stakingPlatform.connect(accounts[3]).claimRewards();
     expect((await token.balanceOf(addresses[3])).toString()).to.equal(
-      "9250000000000000000000"
+      "9249983635337392186707"
     );
     expect(
-      (await stakingPlatform.connect(accounts[3]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[3])).toString()
     ).to.equal("0");
 
     const user4 = (
-      await stakingPlatform.connect(accounts[4]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[4])
     ).toString();
-    expect(user4).to.equal("497260500000000000000");
+    expect(user4).to.equal("497260099568746829020");
     expect((await token.balanceOf(addresses[4])).toString()).to.equal(
-      "2739500000000000000"
+      "2739000000000000000"
     );
     await stakingPlatform.connect(accounts[4]).claimRewards();
     expect((await token.balanceOf(addresses[4])).toString()).to.equal(
-      "500000000000000000000"
+      "499999099568746829020"
     );
     expect(
-      (await stakingPlatform.connect(accounts[4]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[4])).toString()
     ).to.equal("0");
 
     const user5 = (
-      await stakingPlatform.connect(accounts[5]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[5])
     ).toString();
-    expect(user5).to.equal("459965962500000000000000");
+    expect(user5).to.equal("459965577435312024353120");
     expect((await token.balanceOf(addresses[5])).toString()).to.equal(
-      "2534037500000000000000"
+      "2533575000000000000000"
     );
     await stakingPlatform.connect(accounts[5]).claimRewards();
     expect((await token.balanceOf(addresses[5])).toString()).to.equal(
-      "462500000000000000000000"
+      "462499152435312024353120"
     );
     expect(
-      (await stakingPlatform.connect(accounts[5]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[5])).toString()
     ).to.equal("0");
 
     const user6 = (
-      await stakingPlatform.connect(accounts[6]).calculatedReward()
+      await stakingPlatform.calculatedReward(addresses[6])
     ).toString();
-    expect(user6).to.equal("8204798250000000000000");
+    expect(user6).to.equal("8204791119672754946727");
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
-      "45201750000000000000"
+      "45193500000000000000"
     );
     await stakingPlatform.connect(accounts[6]).claimRewards();
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
-      "8250000000000000000000"
+      "8249984619672754946727"
     );
     expect(
-      (await stakingPlatform.connect(accounts[6]).calculatedReward()).toString()
+      (await stakingPlatform.calculatedReward(addresses[6])).toString()
     ).to.equal("0");
   });
 
@@ -494,53 +498,53 @@ describe("StakingPlatform - Deep Pool", () => {
     await stakingPlatform.setPrecision(8);
 
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(
-      "25000000000000000000000"
+      "24999957356671740233384"
     );
     expect((await token.balanceOf(addresses[2])).toString()).to.equal(
-      "87500000000000000000000"
+      "87499847973744292237442"
     );
     expect((await token.balanceOf(addresses[3])).toString()).to.equal(
-      "9250000000000000000000"
+      "9249983635337392186707"
     );
     expect((await token.balanceOf(addresses[4])).toString()).to.equal(
-      "500000000000000000000"
+      "499999099568746829020"
     );
     expect((await token.balanceOf(addresses[5])).toString()).to.equal(
-      "462500000000000000000000"
+      "462499152435312024353120"
     );
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
-      "8250000000000000000000"
+      "8249984619672754946727"
     );
     for (let i = 0; i <= 8; i++) {
       await stakingPlatform.connect(accounts[i]).withdraw();
     }
 
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(
-      "125000000000000000000000"
+      "124999957356671740233384"
     );
     expect((await token.balanceOf(addresses[2])).toString()).to.equal(
-      "437500000000000000000000"
+      "437499847973744292237442"
     );
     expect((await token.balanceOf(addresses[3])).toString()).to.equal(
-      "46250000000000000000000"
+      "46249983635337392186707"
     );
     expect((await token.balanceOf(addresses[4])).toString()).to.equal(
-      "2500000000000000000000"
+      "2499999099568746829020"
     );
     expect((await token.balanceOf(addresses[5])).toString()).to.equal(
-      "2312500000000000000000000"
+      "2312499152435312024353120"
     );
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
-      "41250000000000000000000"
+      "41249984619672754946727"
     );
   });
 
   it("Should withdraw residual balances", async () => {
     expect(
       (await token.balanceOf(stakingPlatform.address)).toString()
-    ).to.equal("4154500000000000000000000");
+    ).to.be.oneOf(["4156556144879693049213600", "4156556134879693049213600"]);
     expect((await token.balanceOf(addresses[0])).toString()).to.equal(
-      "992868000000000000000000000"
+      "992865944940000000000000000"
     );
 
     await token.transfer(
@@ -554,7 +558,7 @@ describe("StakingPlatform - Deep Pool", () => {
       (await token.balanceOf(stakingPlatform.address)).toString()
     ).to.equal("0");
     expect((await token.balanceOf(addresses[0])).toString()).to.equal(
-      "997022500000000000000000000"
+      "997022501074879693049213600"
     );
   });
 
@@ -568,7 +572,7 @@ describe("StakingPlatform - Deep Pool", () => {
   it("Should return the amount staked once staking finished and withdrew", async () => {
     for (let i = 1; i <= 8; i++) {
       expect(
-        (await stakingPlatform.connect(accounts[i]).amountStaked()).toString()
+        (await stakingPlatform.amountStaked(addresses[i])).toString()
       ).to.equal("0");
     }
   });
