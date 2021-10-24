@@ -137,8 +137,13 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * for a specific user
      * @return uint amount of the total deposited Tokens by the caller
      */
-    function amountStaked() external view override returns (uint) {
-        return staked[_msgSender()];
+    function amountStaked(address stakeHolder)
+        external
+        view
+        override
+        returns (uint)
+    {
+        return staked[stakeHolder];
     }
 
     /**
