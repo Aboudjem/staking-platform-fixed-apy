@@ -76,6 +76,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             totalStaked + amount <= stakingMax,
             "Amount staked exceeds MaxStake"
         );
+        require(amount >= 1E18, "Amount must be greater than 1E18");
 
         if (userStartTime[_msgSender()] == 0) {
             userStartTime[_msgSender()] = block.timestamp;
