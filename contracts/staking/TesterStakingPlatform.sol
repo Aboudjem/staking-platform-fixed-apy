@@ -20,8 +20,8 @@ contract StakingPlatformTester is StakingPlatform {
         )
     {}
 
-    function setPrecision(uint _precision) public {
-        precision = 10**_precision;
+    function setPrecision(uint precision_) public {
+        _precision = 10**precision_;
     }
 
     function calculatedReward(address stakeHolder)

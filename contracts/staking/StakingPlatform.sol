@@ -23,12 +23,12 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     uint public lockupPeriod;
     uint public endPeriod;
 
-    uint private totalStaked;
-    uint internal precision = 1E6;
+    uint private _totalStaked;
+    uint internal _precision = 1E6;
 
     mapping(address => uint) public staked;
-    mapping(address => uint) private rewardsToClaim;
-    mapping(address => uint) private userStartTime;
+    mapping(address => uint) private _rewardsToClaim;
+    mapping(address => uint) private _userStartTime;
 
     /**
      * @notice constructor contains all the parameters of the staking platform
@@ -51,7 +51,8 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     /**
      * @notice function that start the staking
      * @dev set `startPeriod` to the current current `block.timestamp`
-     * as well as the `endPeriod` which is `startPeriod` + `stakingDuration`
+     * set `lockupPeriod` which is `block.timestamp` + `lockupDuration`
+     * and `endPeriod` which is `startPeriod` + `stakingDuration`
      */
     function startStaking() external override onlyOwner {
         require(startPeriod == 0, "Staking has already started");
@@ -66,6 +67,10 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @dev user must first approve the amount to deposit before calling this function,
      * cannot exceed the `maxAmountStaked`
      * @param amount, the amount to be deposited
+     * @dev `endPeriod` to equal 0 (Staking didn't started yet),
+     * or `endPeriod` more than current `block.timestamp` (staking not finished yet)
+     * @dev totalStaked + amount must be less than `stakingMax`
+     * @dev that the amount deposit should be at least 1E18 (1token)
      */
     function deposit(uint amount) external override {
         require(
@@ -73,19 +78,19 @@ contract StakingPlatform is IStakingPlatform, Ownable {
             "Staking period ended"
         );
         require(
-            totalStaked + amount <= stakingMax,
+            _totalStaked + amount <= stakingMax,
             "Amount staked exceeds MaxStake"
         );
         require(amount >= 1E18, "Amount must be greater than 1E18");
 
-        if (userStartTime[_msgSender()] == 0) {
-            userStartTime[_msgSender()] = block.timestamp;
+        if (_userStartTime[_msgSender()] == 0) {
+            _userStartTime[_msgSender()] = block.timestamp;
         }
 
         _updateRewards();
 
         staked[_msgSender()] += amount;
-        totalStaked += amount;
+        _totalStaked += amount;
         token.safeTransferFrom(_msgSender(), address(this), amount);
         emit Deposit(_msgSender(), amount);
     }
@@ -93,6 +98,9 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     /**
      * @notice function that allows a user to withdraw its initial deposit
      * @dev must be called only when `block.timestamp` >= `endPeriod`
+     * @dev `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
+     * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
+     * if rewards to claim
      */
     function withdraw() external override {
         require(
@@ -101,12 +109,12 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         );
 
         _updateRewards();
-        if (rewardsToClaim[_msgSender()] > 0) {
+        if (_rewardsToClaim[_msgSender()] > 0) {
             _claimRewards();
         }
 
-        userStartTime[_msgSender()] = 0;
-        totalStaked -= staked[_msgSender()];
+        _userStartTime[_msgSender()] = 0;
+        _totalStaked -= staked[_msgSender()];
         uint stakedBalance = staked[_msgSender()];
         staked[_msgSender()] = 0;
         token.safeTransfer(_msgSender(), stakedBalance);
@@ -119,6 +127,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * Residual balance is all the remaining tokens that have not been distributed
      * (e.g, in case the number of stakeholders is not sufficient)
      * @dev Can only be called one year after the end of the staking period
+     * Cannot claim initial stakeholders deposit
      */
     function withdrawResidualBalance() external onlyOwner {
         require(
@@ -127,7 +136,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         );
 
         uint balance = token.balanceOf(address(this));
-        uint residualBalance = balance - (totalStaked);
+        uint residualBalance = balance - (_totalStaked);
         require(residualBalance > 0, "No residual Balance to withdraw");
         token.safeTransfer(owner(), residualBalance);
     }
@@ -135,6 +144,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     /**
      * @notice function that returns the amount of total Staked tokens
      * for a specific user
+     * @param stakeHolder, address of the user to check
      * @return uint amount of the total deposited Tokens by the caller
      */
     function amountStaked(address stakeHolder)
@@ -152,14 +162,14 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @return uint amount of the total deposited Tokens
      */
     function totalDeposited() external view override returns (uint) {
-        return totalStaked;
+        return _totalStaked;
     }
 
     /**
      * @notice function that returns the amount of pending rewards
      * that can be claimed by the user
      * @param stakeHolder, address of the user to be checked
-     * @return uint amount of claimable tokens by the caller
+     * @return uint amount of claimable rewards
      */
     function rewardOf(address stakeHolder)
         external
@@ -172,7 +182,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
 
     /**
      * @notice function that claims pending rewards
-     * @dev transfer the pending rewards to the user address
+     * @dev transfer the pending rewards to the `msg.sender`
      */
     function claimRewards() external override {
         _claimRewards();
@@ -195,13 +205,14 @@ contract StakingPlatform is IStakingPlatform, Ownable {
 
         return
             (((staked[stakeHolder] * fixedAPY) *
-                _percentageTimeRemaining(stakeHolder)) / (precision * 100)) +
-            rewardsToClaim[stakeHolder];
+                _percentageTimeRemaining(stakeHolder)) / (_precision * 100)) +
+            _rewardsToClaim[stakeHolder];
     }
 
     /**
      * @notice function that returns the remaining time in seconds of the staking period
      * @dev the higher is the precision and the more the time remaining will be precise
+     * @param stakeHolder, address of the user to be checked
      * @return uint percentage of time remaining * precision
      */
     function _percentageTimeRemaining(address stakeHolder)
@@ -209,45 +220,46 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         view
         returns (uint)
     {
-        bool early = startPeriod > userStartTime[stakeHolder];
+        bool early = startPeriod > _userStartTime[stakeHolder];
         uint startTime;
         if (endPeriod > block.timestamp) {
-            startTime = early ? startPeriod : userStartTime[stakeHolder];
+            startTime = early ? startPeriod : _userStartTime[stakeHolder];
             uint timeRemaining = stakingDuration -
                 (block.timestamp - startTime);
             return
-                (precision * (stakingDuration - timeRemaining)) /
+                (_precision * (stakingDuration - timeRemaining)) /
                 stakingDuration;
         }
         startTime = early
             ? 0
-            : stakingDuration - (endPeriod - userStartTime[stakeHolder]);
-        return (precision * (stakingDuration - startTime)) / stakingDuration;
+            : stakingDuration - (endPeriod - _userStartTime[stakeHolder]);
+        return (_precision * (stakingDuration - startTime)) / stakingDuration;
     }
 
     /**
-     * @notice function that claims pending rewards
+     * @notice internal function that claims pending rewards
      * @dev transfer the pending rewards to the user address
      */
     function _claimRewards() private {
         _updateRewards();
 
-        uint _rewardsToClaim = rewardsToClaim[_msgSender()];
-        require(_rewardsToClaim > 0, "Nothing to claim");
+        uint rewardsToClaim = _rewardsToClaim[_msgSender()];
+        require(rewardsToClaim > 0, "Nothing to claim");
 
-        rewardsToClaim[_msgSender()] = 0;
-        token.safeTransfer(_msgSender(), _rewardsToClaim);
-        emit Claim(_msgSender(), _rewardsToClaim);
+        _rewardsToClaim[_msgSender()] = 0;
+        token.safeTransfer(_msgSender(), rewardsToClaim);
+        emit Claim(_msgSender(), rewardsToClaim);
     }
 
     /**
      * @notice function that update pending rewards
      * and shift them to rewardsToClaim
-     * @dev transfer the pending rewards to the user address
+     * @dev update rewards claimable
+     * and check the time spent since deposit for the `msg.sender`
      */
     function _updateRewards() private {
-        rewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
-        userStartTime[_msgSender()] = (block.timestamp >= endPeriod)
+        _rewardsToClaim[_msgSender()] = _calculateRewards(_msgSender());
+        _userStartTime[_msgSender()] = (block.timestamp >= endPeriod)
             ? endPeriod
             : block.timestamp;
     }
