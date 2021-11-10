@@ -34,6 +34,16 @@ interface IStakingPlatform {
     function withdraw() external;
 
     /**
+     * @notice function that allows a user to withdraw its initial deposit
+     * @dev must be called only when `block.timestamp` >= `endPeriod`
+     * @dev `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
+     * @param amount, amount to withdraw
+     * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
+     * if rewards to claim
+     */
+    function withdrawAmount(uint amount) external;
+
+    /**
      * @notice function that returns the amount of total Staked tokens
      * for a specific user
      * @param stakeHolder, address of the user to check
