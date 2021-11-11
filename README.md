@@ -1,9 +1,9 @@
 # StakingPlatform
 
+![HackenAudits](https://img.shields.io/badge/Hacken-Passed-brightgreen?style=plastic&logo=springsecurity)
 [![Coverage Status](https://coveralls.io/repos/github/Aboudjem/staking-platform-fixed-apy/badge.svg?branch=features/actions)](https://coveralls.io/github/Aboudjem/staking-platform-fixed-apy?branch=features/actions)
 [![MythXBadge](https://badgen.net/https/api.mythx.io/v1/projects/3c2be13e-9b64-42ac-9100-e27db7c8d17a/badge/data?cache=300&icon=https://raw.githubusercontent.com/ConsenSys/mythx-github-badge/main/logo_white.svg)](https://docs.mythx.io/dashboard/github-badges)
 ![Solidity](https://shields.io/badge/solidity-0.8.9-blue?logo=solidity)
-
 Fixed APY Staking platform with Lockup and fixed APY, duration and max stake
 
 ## Workflow
