@@ -1,7 +1,7 @@
-const { n18, increaseTime, UINT_MAX } = require("./helpers");
+const { n18, increaseTime, UINT_MAX } = require("../helpers");
 const { expect } = require("chai");
 
-describe("StakingPlatform - Deep Pool", () => {
+describe("StakingPlatform - Deep Pool - withdrawal with amount", () => {
   let token;
   let stakingPlatform;
   let accounts;
@@ -346,7 +346,6 @@ describe("StakingPlatform - Deep Pool", () => {
   });
 
   it("Should fail claiming tokens", async () => {
-    // await expect(stakingPlatform.claimRewards());
     await expect(stakingPlatform.claimRewards()).to.revertedWith(
       "Nothing to claim"
     );
@@ -390,7 +389,9 @@ describe("StakingPlatform - Deep Pool", () => {
     let userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
     expect(userRewards).to.equal("2500000000000000000000");
 
-    await stakingPlatform.connect(accounts[7]).withdrawAll();
+    await stakingPlatform
+      .connect(accounts[7])
+      .withdraw(await stakingPlatform.amountStaked(addresses[7]));
 
     const userBalance = (await token.balanceOf(addresses[7])).toString();
     userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
@@ -520,8 +521,10 @@ describe("StakingPlatform - Deep Pool", () => {
     expect((await token.balanceOf(addresses[6])).toString()).to.equal(
       "8249984619672754946727"
     );
-    for (let i = 0; i <= 8; i++) {
-      await stakingPlatform.connect(accounts[i]).withdrawAll();
+    for (let i = 0; i < 7; i++) {
+      await stakingPlatform
+        .connect(accounts[i])
+        .withdraw(await stakingPlatform.amountStaked(addresses[i]));
     }
 
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(

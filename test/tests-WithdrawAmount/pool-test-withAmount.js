@@ -1,7 +1,7 @@
-const { n18, increaseTime, UINT_MAX, ONE_DAY } = require("./helpers");
+const { n18, increaseTime, UINT_MAX, ONE_DAY } = require("../helpers");
 const { expect } = require("chai");
 
-describe("StakingPlatform - Pool", () => {
+describe("StakingPlatform - Pool - withdrawal with amount", () => {
   let token;
   let stakingPlatform;
   let accounts;
@@ -93,8 +93,12 @@ describe("StakingPlatform - Pool", () => {
     );
     expect((await token.balanceOf(addresses[1])).toString()).to.equal("0");
     expect((await token.balanceOf(addresses[2])).toString()).to.equal("0");
-    await stakingPlatform.connect(accounts[1]).withdrawAll();
-    await stakingPlatform.connect(accounts[2]).withdrawAll();
+    await stakingPlatform
+      .connect(accounts[1])
+      .withdraw(await stakingPlatform.amountStaked(addresses[1]));
+    await stakingPlatform
+      .connect(accounts[2])
+      .withdraw(await stakingPlatform.amountStaked(addresses[2]));
     expect((await stakingPlatform.rewardOf(addresses[1])).toString()).to.equal(
       "0"
     );
@@ -472,7 +476,9 @@ describe("StakingPlatform - Pool", () => {
     await increaseTime(200 * 60 * 60 * 24);
 
     await expect(
-      stakingPlatform.connect(accounts[7]).withdrawAll()
+      stakingPlatform
+        .connect(accounts[7])
+        .withdraw(await stakingPlatform.amountStaked(addresses[7]))
     ).to.revertedWith("No withdraw until lockup ends");
   });
 
@@ -548,7 +554,9 @@ describe("StakingPlatform - Pool", () => {
     let userRewards = (await stakingPlatform.rewardOf(addresses[1])).toString();
     expect(userRewards).to.equal("9453465887958700000000");
 
-    await stakingPlatform.connect(accounts[1]).withdrawAll();
+    await stakingPlatform
+      .connect(accounts[1])
+      .withdraw(await stakingPlatform.amountStaked(addresses[1]));
 
     const userBalance = (await token.balanceOf(addresses[1])).toString();
     userRewards = (await stakingPlatform.rewardOf(addresses[1])).toString();
@@ -563,7 +571,9 @@ describe("StakingPlatform - Pool", () => {
     let userRewards = (await stakingPlatform.rewardOf(addresses[3])).toString();
     expect(userRewards).to.equal("549990696736300000000");
 
-    await stakingPlatform.connect(accounts[3]).withdrawAll();
+    await stakingPlatform
+      .connect(accounts[3])
+      .withdraw(await stakingPlatform.amountStaked(addresses[3]));
 
     const userBalance = (await token.balanceOf(addresses[3])).toString();
     userRewards = (await stakingPlatform.rewardOf(addresses[3])).toString();
@@ -582,7 +592,6 @@ describe("StakingPlatform - Pool", () => {
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(
       "110054358597958700000000"
     );
-
     expect(
       (await stakingPlatform.calculatedReward(addresses[1])).toString()
     ).to.equal("0");
@@ -631,7 +640,12 @@ describe("StakingPlatform - Pool", () => {
 
   it("Should withdraw initial deposit", async () => {
     for (let i = 0; i <= 8; i++) {
-      await stakingPlatform.connect(accounts[i]).withdrawAll();
+      // eslint-disable-next-line eqeqeq
+      if ((await stakingPlatform.amountStaked(addresses[i])) != 0) {
+        await stakingPlatform
+          .connect(accounts[i])
+          .withdraw(await stakingPlatform.amountStaked(addresses[i]));
+      }
     }
 
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(

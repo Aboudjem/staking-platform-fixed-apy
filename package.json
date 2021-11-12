@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Aboudjem/StakingPlatform.git"
+    "url": "git+https://github.com/RetreebInc/StakingPlatform.git"
   },
   "keywords": [
     "erc20",
@@ -58,8 +58,8 @@
     "hardhat-gas-reporter": "^1.0.4",
     "husky": "^7.0.4",
     "prettier": "^2.4.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.18",
-    "solc-0.8": "npm:solc@^0.8.9",
+    "prettier-plugin-solidity": "^1.0.0-beta.19",
+    "solc-0.8": "npm:solc@^0.8.10",
     "solidity-docgen": "^0.5.16",
     "solhint": "^3.3.6",
     "solidity-coverage": "^0.7.17"
@@ -68,7 +68,7 @@
     "@openzeppelin/contracts": "^4.3.2"
   },
   "bugs": {
-    "url": "https://github.com/Aboudjem/StakingPlatform/issues"
+    "url": "https://github.com/RetreebInc/StakingPlatform/issues"
   },
-  "homepage": "https://github.com/Aboudjem/StakingPlatform#readme"
+  "homepage": "https://github.com/RetreebInc/StakingPlatform#readme"
 }
