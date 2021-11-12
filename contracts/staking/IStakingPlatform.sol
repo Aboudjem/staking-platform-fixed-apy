@@ -19,8 +19,8 @@ interface IStakingPlatform {
      * @param amount, the amount to be deposited
      * @dev `endPeriod` to equal 0 (Staking didn't started yet),
      * or `endPeriod` more than current `block.timestamp` (staking not finished yet)
-     * @dev totalStaked + amount must be less than `stakingMax`
-     * @dev that the amount deposit should be at least 1E18 (1token)
+     * @dev `totalStaked + amount` must be less than `stakingMax`
+     * @dev that the amount deposited should greater than 0
      */
     function deposit(uint amount) external;
 
@@ -31,17 +31,18 @@ interface IStakingPlatform {
      * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
      * if rewards to claim
      */
-    function withdraw() external;
+    function withdrawAll() external;
 
     /**
      * @notice function that allows a user to withdraw its initial deposit
-     * @dev must be called only when `block.timestamp` >= `endPeriod`
-     * @dev `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
      * @param amount, amount to withdraw
+     * @dev `block.timestamp` must be higher than `lockupPeriod` (lockupPeriod finished)
+     * @dev `amount` must be higher than `0`
+     * @dev `amount` must be lower or equal to the amount staked
      * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
      * if rewards to claim
      */
-    function withdrawAmount(uint amount) external;
+    function withdraw(uint amount) external;
 
     /**
      * @notice function that returns the amount of total Staked tokens
