@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.9;
+pragma solidity =0.8.10;
 
 import "./IStakingPlatform.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -59,22 +59,100 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         startPeriod = block.timestamp;
         lockupPeriod = block.timestamp + lockupDuration;
         endPeriod = block.timestamp + stakingDuration;
-        emit StartStaking(startPeriod, endPeriod);
+        emit StartStaking(startPeriod, lockupDuration, endPeriod);
+    }
+
+    /**
+     * @notice function that allows a user to deposit tokens
+     * @dev user must first approve the amount to deposit before calling this function,
+     * cannot exceed the `maxAmountStaked`
+     * @param amount, the amount to be deposited
+     * @dev `endPeriod` to equal 0 (Staking didn't started yet),
+     * or `endPeriod` more than current `block.timestamp` (staking not finished yet)
+     * @dev `totalStaked + amount` must be less than `stakingMax`
+     * @dev that the amount deposited should greater than 0
+     */
+    function deposit(uint amount) external override {
+        require(
+            endPeriod == 0 || endPeriod > block.timestamp,
+            "Staking period ended"
+        );
+        require(
+            _totalStaked + amount <= stakingMax,
+            "Amount staked exceeds MaxStake"
+        );
+        require(amount > 0, "Amount must be greater than 0");
+
+        if (_userStartTime[_msgSender()] == 0) {
+            _userStartTime[_msgSender()] = block.timestamp;
+        }
+
+        _updateRewards();
+
+        staked[_msgSender()] += amount;
+        _totalStaked += amount;
+        token.safeTransferFrom(_msgSender(), address(this), amount);
+        emit Deposit(_msgSender(), amount);
+    }
+
+    /**
+     * @notice function that allows a user to withdraw its initial deposit
+     * @param amount, amount to withdraw
+     * @dev `block.timestamp` must be higher than `lockupPeriod` (lockupPeriod finished)
+     * @dev `amount` must be higher than `0`
+     * @dev `amount` must be lower or equal to the amount staked
+     * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
+     * if rewards to claim
+     */
+    function withdraw(uint amount) external override {
+        require(
+            block.timestamp >= lockupPeriod,
+            "No withdraw until lockup ends"
+        );
+        require(amount > 0, "Amount must be greater than 0");
+        require(
+            amount <= staked[_msgSender()],
+            "Amount higher than stakedAmount"
+        );
+
+        _updateRewards();
+        if (_rewardsToClaim[_msgSender()] > 0) {
+            _claimRewards();
+        }
+
+        _userStartTime[_msgSender()] = block.timestamp;
+        _totalStaked -= amount;
+        staked[_msgSender()] -= amount;
+        token.safeTransfer(_msgSender(), amount);
+
+        emit Withdraw(_msgSender(), amount);
     }
 
     /**
      * @notice function that allows a user to withdraw its initial deposit
      * @dev must be called only when `block.timestamp` >= `endPeriod`
      * @dev `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
-     * @param amount, amount to withdraw
      * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
      * if rewards to claim
      */
-    function withdrawAmount(uint amount) external override {
-        uint userStaking = staked[_msgSender()];
-        uint result = userStaking - amount;
-        withdraw();
-        deposit(result);
+    function withdrawAll() external override {
+        require(
+            block.timestamp >= lockupPeriod,
+            "No withdraw until lockup ends"
+        );
+
+        _updateRewards();
+        if (_rewardsToClaim[_msgSender()] > 0) {
+            _claimRewards();
+        }
+
+        _userStartTime[_msgSender()] = 0;
+        _totalStaked -= staked[_msgSender()];
+        uint stakedBalance = staked[_msgSender()];
+        staked[_msgSender()] = 0;
+        token.safeTransfer(_msgSender(), stakedBalance);
+
+        emit Withdraw(_msgSender(), stakedBalance);
     }
 
     /**
@@ -141,66 +219,6 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      */
     function claimRewards() external override {
         _claimRewards();
-    }
-
-    /**
-     * @notice function that allows a user to deposit tokens
-     * @dev user must first approve the amount to deposit before calling this function,
-     * cannot exceed the `maxAmountStaked`
-     * @param amount, the amount to be deposited
-     * @dev `endPeriod` to equal 0 (Staking didn't started yet),
-     * or `endPeriod` more than current `block.timestamp` (staking not finished yet)
-     * @dev totalStaked + amount must be less than `stakingMax`
-     * @dev that the amount deposit should be at least 1E18 (1token)
-     */
-    function deposit(uint amount) public override {
-        require(
-            endPeriod == 0 || endPeriod > block.timestamp,
-            "Staking period ended"
-        );
-        require(
-            _totalStaked + amount <= stakingMax,
-            "Amount staked exceeds MaxStake"
-        );
-        require(amount >= 1E18, "Amount must be greater than 1E18");
-
-        if (_userStartTime[_msgSender()] == 0) {
-            _userStartTime[_msgSender()] = block.timestamp;
-        }
-
-        _updateRewards();
-
-        staked[_msgSender()] += amount;
-        _totalStaked += amount;
-        token.safeTransferFrom(_msgSender(), address(this), amount);
-        emit Deposit(_msgSender(), amount);
-    }
-
-    /**
-     * @notice function that allows a user to withdraw its initial deposit
-     * @dev must be called only when `block.timestamp` >= `endPeriod`
-     * @dev `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
-     * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
-     * if rewards to claim
-     */
-    function withdraw() public override {
-        require(
-            block.timestamp >= lockupPeriod,
-            "No withdraw until lockup ends"
-        );
-
-        _updateRewards();
-        if (_rewardsToClaim[_msgSender()] > 0) {
-            _claimRewards();
-        }
-
-        _userStartTime[_msgSender()] = 0;
-        _totalStaked -= staked[_msgSender()];
-        uint stakedBalance = staked[_msgSender()];
-        staked[_msgSender()] = 0;
-        token.safeTransfer(_msgSender(), stakedBalance);
-
-        emit Withdraw(_msgSender(), stakedBalance);
     }
 
     /**

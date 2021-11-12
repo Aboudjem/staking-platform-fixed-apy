@@ -1,7 +1,7 @@
-const { n18, increaseTime, claimAndStake, UINT_MAX } = require("./helpers");
+const { n18, increaseTime, claimAndStake, UINT_MAX } = require("../helpers");
 const { expect } = require("chai");
 
-describe("StakingPlatform - Mid Pool", () => {
+describe("StakingPlatform - Mid Pool - withdrawal with amount", () => {
   let token;
   let stakingPlatform;
   let accounts;
@@ -151,19 +151,29 @@ describe("StakingPlatform - Mid Pool", () => {
 
   it("Should fail withdraw initial deposit after withdrawResidualBalance", async () => {
     // Success enough balance
-    await stakingPlatform.connect(accounts[1]).withdrawAll();
+    await stakingPlatform
+      .connect(accounts[1])
+      .withdraw(await stakingPlatform.amountStaked(addresses[1]));
 
     // Fails not enough balance
     await expect(
-      stakingPlatform.connect(accounts[2]).withdrawAll()
+      stakingPlatform
+        .connect(accounts[2])
+        .withdraw(await stakingPlatform.amountStaked(addresses[2]))
     ).to.revertedWith("ERC20: transfer amount exceeds balance");
   });
 
   it("Should withdraw initial deposit", async () => {
     await token.transfer(stakingPlatform.address, n18("1000000"));
 
-    await stakingPlatform.connect(accounts[1]).withdrawAll();
-    await stakingPlatform.connect(accounts[2]).withdrawAll();
+    await expect(
+      stakingPlatform
+        .connect(accounts[1])
+        .withdraw(await stakingPlatform.amountStaked(addresses[1]))
+    ).to.be.revertedWith("Amount must be greater than 0");
+    await stakingPlatform
+      .connect(accounts[2])
+      .withdraw(await stakingPlatform.amountStaked(addresses[2]));
 
     const balance1 = String(await token.balanceOf(addresses[1])).slice(0, 7);
     expect(balance1).to.equal("1127430");
