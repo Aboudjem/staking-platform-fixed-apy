@@ -1,5 +1,6 @@
 # StakingPlatform
 
+![ImmuneBytesAudits](https://img.shields.io/badge/ImmuneBytes-Passed-brightgreen?logo=springsecurity)
 ![HackenAudits](https://img.shields.io/badge/Hacken-Passed-brightgreen?logo=springsecurity)
 [![Coverage Status](https://coveralls.io/repos/github/Aboudjem/staking-platform-fixed-apy/badge.svg?branch=features/actions)](https://coveralls.io/github/Aboudjem/staking-platform-fixed-apy?branch=features/actions)
 [![MythXBadge](https://badgen.net/https/api.mythx.io/v1/projects/3c2be13e-9b64-42ac-9100-e27db7c8d17a/badge/data?cache=300&icon=https://raw.githubusercontent.com/ConsenSys/mythx-github-badge/main/logo_white.svg)](https://docs.mythx.io/dashboard/github-badges)
@@ -66,10 +67,20 @@ user must first approve the amount to deposit before calling this function,
 cannot exceed the `maxAmountStaked`
 `endPeriod` to equal 0 (Staking didn't started yet),
 or `endPeriod` more than current `block.timestamp` (staking not finished yet)
-totalStaked + amount must be less than `stakingMax`
-that the amount deposit should be at least 1E18 (1token)
+`totalStaked + amount` must be less than `stakingMax`
+that the amount deposited should greater than 0
 
-### `withdraw()` (external)
+### `withdraw(uint256 amount)` (external)
+
+function that allows a user to withdraw its initial deposit
+
+`block.timestamp` must be higher than `lockupPeriod` (lockupPeriod finished)
+`amount` must be higher than `0`
+`amount` must be lower or equal to the amount staked
+withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
+if rewards to claim
+
+### `withdrawAll()` (external)
 
 function that allows a user to withdraw its initial deposit
 
