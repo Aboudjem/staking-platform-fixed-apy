@@ -132,15 +132,27 @@ contract StakingPlatform is IStakingPlatform, Ownable {
      * @notice function that allows a user to withdraw its initial deposit
      * @dev must be called only when `block.timestamp` >= `endPeriod`
      * @dev `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
-     * @param amount, amount to withdraw
      * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
      * if rewards to claim
      */
-    function withdrawAmount(uint amount) external override {
-        uint userStaking = staked[_msgSender()];
-        uint result = userStaking - amount;
-        withdraw();
-        deposit(result);
+    function withdrawAll() external override {
+        require(
+            block.timestamp >= lockupPeriod,
+            "No withdraw until lockup ends"
+        );
+
+        _updateRewards();
+        if (_rewardsToClaim[_msgSender()] > 0) {
+            _claimRewards();
+        }
+
+        _userStartTime[_msgSender()] = 0;
+        _totalStaked -= staked[_msgSender()];
+        uint stakedBalance = staked[_msgSender()];
+        staked[_msgSender()] = 0;
+        token.safeTransfer(_msgSender(), stakedBalance);
+
+        emit Withdraw(_msgSender(), stakedBalance);
     }
 
     /**
