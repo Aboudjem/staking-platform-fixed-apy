@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.9;
+pragma solidity =0.8.10;
 
 /// @author RetreebInc
 /// @title Interface Staking Platform with fixed APY and lockup
