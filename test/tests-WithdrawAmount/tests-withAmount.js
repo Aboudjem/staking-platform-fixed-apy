@@ -1,7 +1,7 @@
-const { n18, increaseTime, UINT_MAX, ONE_DAY } = require("./helpers");
+const { n18, increaseTime, UINT_MAX, ONE_DAY } = require("../helpers");
 const { expect } = require("chai");
 
-describe("StakingPlatform - Withdraw Amount", () => {
+describe("StakingPlatform - Withdraw Amount - withdrawal with amount", () => {
   let token;
   let stakingPlatform;
   let accounts;
@@ -111,8 +111,8 @@ describe("StakingPlatform - Withdraw Amount", () => {
     expect(stakedAmount1Before).to.equal(n18("100000"));
     expect(stakedAmount2Before).to.equal(n18("100000"));
 
-    await stakingPlatform.connect(accounts[1]).withdrawAmount(n18("40000"));
-    await stakingPlatform.connect(accounts[2]).withdrawAmount(n18("40000"));
+    await stakingPlatform.connect(accounts[1]).withdraw(n18("40000"));
+    await stakingPlatform.connect(accounts[2]).withdraw(n18("40000"));
 
     const stakedAmount1After = await stakingPlatform.amountStaked(addresses[1]);
     const stakedAmount2After = await stakingPlatform.amountStaked(addresses[2]);
@@ -120,6 +120,135 @@ describe("StakingPlatform - Withdraw Amount", () => {
     expect(stakedAmount1After).to.equal(n18("60000"));
     expect(stakedAmount2After).to.equal(n18("60000"));
   });
+
+  it("Should fail withdraw 0 after 50 days", async () => {
+    await increaseTime(ONE_DAY * 50);
+
+    const balance1Before = await token.balanceOf(addresses[1]);
+    const balance2Before = await token.balanceOf(addresses[2]);
+    const stakedAmount1Before = await stakingPlatform.amountStaked(
+      addresses[1]
+    );
+    const stakedAmount2Before = await stakingPlatform.amountStaked(
+      addresses[2]
+    );
+    expect(balance1Before).to.equal(n18("0"));
+    expect(balance2Before).to.equal(n18("0"));
+    expect(stakedAmount1Before).to.equal(n18("100000"));
+    expect(stakedAmount2Before).to.equal(n18("100000"));
+
+    await expect(
+      stakingPlatform.connect(accounts[1]).withdraw(n18("0"))
+    ).to.be.revertedWith("Amount must be greater than 0");
+
+    await expect(
+      stakingPlatform.connect(accounts[2]).withdraw(n18("0"))
+    ).to.be.revertedWith("Amount must be greater than 0");
+
+    const stakedAmount1After = await stakingPlatform.amountStaked(addresses[1]);
+    const stakedAmount2After = await stakingPlatform.amountStaked(addresses[2]);
+
+    expect(stakedAmount1After).to.equal(n18("100000"));
+    expect(stakedAmount2After).to.equal(n18("100000"));
+  });
+
+  it("Should fail withdraw more than stakedAmount after 50 days", async () => {
+    await increaseTime(ONE_DAY * 50);
+
+    const balance1Before = await token.balanceOf(addresses[1]);
+    const balance2Before = await token.balanceOf(addresses[2]);
+    const stakedAmount1Before = await stakingPlatform.amountStaked(
+      addresses[1]
+    );
+    const stakedAmount2Before = await stakingPlatform.amountStaked(
+      addresses[2]
+    );
+    expect(balance1Before).to.equal(n18("0"));
+    expect(balance2Before).to.equal(n18("0"));
+    expect(stakedAmount1Before).to.equal(n18("100000"));
+    expect(stakedAmount2Before).to.equal(n18("100000"));
+
+    await expect(
+      stakingPlatform.connect(accounts[1]).withdraw(n18("100001"))
+    ).to.be.revertedWith("Amount higher than stakedAmount");
+
+    await expect(
+      stakingPlatform.connect(accounts[2]).withdraw(n18("100001"))
+    ).to.be.revertedWith("Amount higher than stakedAmount");
+
+    const stakedAmount1After = await stakingPlatform.amountStaked(addresses[1]);
+    const stakedAmount2After = await stakingPlatform.amountStaked(addresses[2]);
+
+    expect(stakedAmount1After).to.equal(n18("100000"));
+    expect(stakedAmount2After).to.equal(n18("100000"));
+  });
+
+  // it("Should fail withdraw if not enough allowance after 50 days", async () => {
+  //   await increaseTime(ONE_DAY * 50);
+  //
+  //   const balance1Before = await token.balanceOf(addresses[1]);
+  //   const balance2Before = await token.balanceOf(addresses[2]);
+  //   const stakedAmount1Before = await stakingPlatform.amountStaked(
+  //     addresses[1]
+  //   );
+  //   const stakedAmount2Before = await stakingPlatform.amountStaked(
+  //     addresses[2]
+  //   );
+  //   expect(balance1Before).to.equal(n18("0"));
+  //   expect(balance2Before).to.equal(n18("0"));
+  //   expect(stakedAmount1Before).to.equal(n18("100000"));
+  //   expect(stakedAmount2Before).to.equal(n18("100000"));
+  //
+  //   await token.connect(accounts[1]).approve(stakingPlatform.address, 0);
+  //   await token.connect(accounts[2]).approve(stakingPlatform.address, 0);
+  //
+  //   await expect(
+  //     stakingPlatform.connect(accounts[1]).withdraw(n18("1000"))
+  //   ).to.be.revertedWith("Allowance should be increased");
+  //
+  //   await expect(
+  //     stakingPlatform.connect(accounts[2]).withdraw(n18("5000"))
+  //   ).to.be.revertedWith("Allowance should be increased");
+  // });
+  //
+  // it("Should fail withdraw if not enough allowance after 50 days", async () => {
+  //   await increaseTime(ONE_DAY * 50);
+  //
+  //   const balance1Before = await token.balanceOf(addresses[1]);
+  //   const balance2Before = await token.balanceOf(addresses[2]);
+  //   const stakedAmount1Before = await stakingPlatform.amountStaked(
+  //     addresses[1]
+  //   );
+  //   const stakedAmount2Before = await stakingPlatform.amountStaked(
+  //     addresses[2]
+  //   );
+  //   expect(balance1Before).to.equal(n18("0"));
+  //   expect(balance2Before).to.equal(n18("0"));
+  //   expect(stakedAmount1Before).to.equal(n18("100000"));
+  //   expect(stakedAmount2Before).to.equal(n18("100000"));
+  //
+  //   await token.connect(accounts[1]).approve(stakingPlatform.address, 0);
+  //   await token.connect(accounts[2]).approve(stakingPlatform.address, 0);
+  //
+  //   await expect(
+  //     stakingPlatform.connect(accounts[1]).withdraw(n18("1000"))
+  //   ).to.be.revertedWith("Allowance should be increased");
+  //
+  //   await expect(
+  //     stakingPlatform.connect(accounts[2]).withdraw(n18("5000"))
+  //   ).to.be.revertedWith("Allowance should be increased");
+  //
+  //   await token
+  //     .connect(accounts[1])
+  //     .approve(stakingPlatform.address, n18("98000"));
+  //
+  //   await stakingPlatform.connect(accounts[1]).withdraw(n18("1000"));
+  //   //
+  //   // await token
+  //   //   .connect(accounts[1])
+  //   //   .approve(stakingPlatform.address, n18("5000"));
+  //   // await token.connect(accounts[2]).approve(stakingPlatform.address, 0);
+  // });
 
   it("Should withdraw 90% after 50 days and returns rewards after endPeriod", async () => {
     await increaseTime(ONE_DAY * 50);
@@ -142,8 +271,8 @@ describe("StakingPlatform - Withdraw Amount", () => {
     expect(user1Rewards.toString()).to.equal(n18("5000"));
     expect(user2Rewards.toString()).to.equal(n18("5000"));
 
-    await stakingPlatform.connect(accounts[1]).withdrawAmount(n18("90000"));
-    await stakingPlatform.connect(accounts[2]).withdrawAmount(n18("99000"));
+    await stakingPlatform.connect(accounts[1]).withdraw(n18("90000"));
+    await stakingPlatform.connect(accounts[2]).withdraw(n18("99000"));
 
     const balance1After = await token.balanceOf(addresses[1]);
     const balance2After = await token.balanceOf(addresses[2]);
@@ -168,8 +297,12 @@ describe("StakingPlatform - Withdraw Amount", () => {
     expect(user1Rewards.toString()).to.equal(n18("499.999"));
     expect(user2Rewards.toString()).to.equal(n18("49.9999"));
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform
+      .connect(accounts[1])
+      .withdraw(await stakingPlatform.amountStaked(addresses[1]));
+    await stakingPlatform
+      .connect(accounts[2])
+      .withdraw(await stakingPlatform.amountStaked(addresses[2]));
 
     const balance1Final = await token.balanceOf(addresses[1]);
     const balance2Final = await token.balanceOf(addresses[2]);
