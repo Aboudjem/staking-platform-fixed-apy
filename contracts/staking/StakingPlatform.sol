@@ -222,66 +222,6 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     }
 
     /**
-     * @notice function that allows a user to deposit tokens
-     * @dev user must first approve the amount to deposit before calling this function,
-     * cannot exceed the `maxAmountStaked`
-     * @param amount, the amount to be deposited
-     * @dev `endPeriod` to equal 0 (Staking didn't started yet),
-     * or `endPeriod` more than current `block.timestamp` (staking not finished yet)
-     * @dev totalStaked + amount must be less than `stakingMax`
-     * @dev that the amount deposit should be at least 1E18 (1token)
-     */
-    function deposit(uint amount) public override {
-        require(
-            endPeriod == 0 || endPeriod > block.timestamp,
-            "Staking period ended"
-        );
-        require(
-            _totalStaked + amount <= stakingMax,
-            "Amount staked exceeds MaxStake"
-        );
-        require(amount >= 1E18, "Amount must be greater than 1E18");
-
-        if (_userStartTime[_msgSender()] == 0) {
-            _userStartTime[_msgSender()] = block.timestamp;
-        }
-
-        _updateRewards();
-
-        staked[_msgSender()] += amount;
-        _totalStaked += amount;
-        token.safeTransferFrom(_msgSender(), address(this), amount);
-        emit Deposit(_msgSender(), amount);
-    }
-
-    /**
-     * @notice function that allows a user to withdraw its initial deposit
-     * @dev must be called only when `block.timestamp` >= `endPeriod`
-     * @dev `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
-     * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
-     * if rewards to claim
-     */
-    function withdraw() public override {
-        require(
-            block.timestamp >= lockupPeriod,
-            "No withdraw until lockup ends"
-        );
-
-        _updateRewards();
-        if (_rewardsToClaim[_msgSender()] > 0) {
-            _claimRewards();
-        }
-
-        _userStartTime[_msgSender()] = 0;
-        _totalStaked -= staked[_msgSender()];
-        uint stakedBalance = staked[_msgSender()];
-        staked[_msgSender()] = 0;
-        token.safeTransfer(_msgSender(), stakedBalance);
-
-        emit Withdraw(_msgSender(), stakedBalance);
-    }
-
-    /**
      * @notice calculate rewards based on the `fixedAPY`, `_percentageTimeRemaining()`
      * @dev the higher is the precision and the more the time remaining will be precise
      * @param stakeHolder, address of the user to be checked
