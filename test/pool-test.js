@@ -634,26 +634,6 @@ describe("StakingPlatform - Pool", () => {
   });
 
   it("Should withdraw initial deposit", async () => {
-    // await stakingPlatform.setPrecision(8);
-
-    // expect((await token.balanceOf(addresses[1])).toString()).to.equal(
-    //   "25000000000000000000000"
-    // );
-    // expect((await token.balanceOf(addresses[2])).toString()).to.equal(
-    //   "87500000000000000000000"
-    // );
-    // expect((await token.balanceOf(addresses[3])).toString()).to.equal(
-    //   "9250000000000000000000"
-    // );
-    // expect((await token.balanceOf(addresses[4])).toString()).to.equal(
-    //   "500000000000000000000"
-    // );
-    // expect((await token.balanceOf(addresses[5])).toString()).to.equal(
-    //   "462500000000000000000000"
-    // );
-    // expect((await token.balanceOf(addresses[6])).toString()).to.equal(
-    //   "8250000000000000000000"
-    // );
     for (let i = 0; i <= 8; i++) {
       await stakingPlatform.connect(accounts[i]).withdraw();
     }
