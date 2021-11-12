@@ -59,7 +59,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         startPeriod = block.timestamp;
         lockupPeriod = block.timestamp + lockupDuration;
         endPeriod = block.timestamp + stakingDuration;
-        emit StartStaking(startPeriod, endPeriod);
+        emit StartStaking(startPeriod, lockupDuration, endPeriod);
     }
 
     /**

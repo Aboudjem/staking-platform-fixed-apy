@@ -91,5 +91,5 @@ interface IStakingPlatform {
     /**
      * @dev Emitted when staking has started
      */
-    event StartStaking(uint startPeriod, uint endingPeriod);
+    event StartStaking(uint startPeriod, uint lockupPeriod, uint endingPeriod);
 }
