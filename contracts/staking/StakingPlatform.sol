@@ -63,6 +63,72 @@ contract StakingPlatform is IStakingPlatform, Ownable {
     }
 
     /**
+     * @notice function that allows a user to deposit tokens
+     * @dev user must first approve the amount to deposit before calling this function,
+     * cannot exceed the `maxAmountStaked`
+     * @param amount, the amount to be deposited
+     * @dev `endPeriod` to equal 0 (Staking didn't started yet),
+     * or `endPeriod` more than current `block.timestamp` (staking not finished yet)
+     * @dev `totalStaked + amount` must be less than `stakingMax`
+     * @dev that the amount deposited should greater than 0
+     */
+    function deposit(uint amount) external override {
+        require(
+            endPeriod == 0 || endPeriod > block.timestamp,
+            "Staking period ended"
+        );
+        require(
+            _totalStaked + amount <= stakingMax,
+            "Amount staked exceeds MaxStake"
+        );
+        require(amount > 0, "Amount must be greater than 0");
+
+        if (_userStartTime[_msgSender()] == 0) {
+            _userStartTime[_msgSender()] = block.timestamp;
+        }
+
+        _updateRewards();
+
+        staked[_msgSender()] += amount;
+        _totalStaked += amount;
+        token.safeTransferFrom(_msgSender(), address(this), amount);
+        emit Deposit(_msgSender(), amount);
+    }
+
+    /**
+     * @notice function that allows a user to withdraw its initial deposit
+     * @param amount, amount to withdraw
+     * @dev `block.timestamp` must be higher than `lockupPeriod` (lockupPeriod finished)
+     * @dev `amount` must be higher than `0`
+     * @dev `amount` must be lower or equal to the amount staked
+     * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
+     * if rewards to claim
+     */
+    function withdraw(uint amount) external override {
+        require(
+            block.timestamp >= lockupPeriod,
+            "No withdraw until lockup ends"
+        );
+        require(amount > 0, "Amount must be greater than 0");
+        require(
+            amount <= staked[_msgSender()],
+            "Amount higher than stakedAmount"
+        );
+
+        _updateRewards();
+        if (_rewardsToClaim[_msgSender()] > 0) {
+            _claimRewards();
+        }
+
+        _userStartTime[_msgSender()] = block.timestamp;
+        _totalStaked -= amount;
+        staked[_msgSender()] -= amount;
+        token.safeTransfer(_msgSender(), amount);
+
+        emit Withdraw(_msgSender(), amount);
+    }
+
+    /**
      * @notice function that allows a user to withdraw its initial deposit
      * @dev must be called only when `block.timestamp` >= `endPeriod`
      * @dev `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
