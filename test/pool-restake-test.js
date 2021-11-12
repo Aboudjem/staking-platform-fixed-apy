@@ -55,10 +55,6 @@ describe("StakingPlatform - Restake", () => {
     await stakingPlatform.deployed();
   });
 
-  // it("Should set precision to 2", async () => {
-  //   await stakingPlatform.setPrecision(4);
-  // });
-
   it("Should send tokens to staking platform", async () => {
     expect(await token.balanceOf(stakingPlatform.address)).to.equal(n18("0"));
     await token.transfer(stakingPlatform.address, n18("50000000"));
@@ -347,8 +343,8 @@ describe("StakingPlatform - Restake", () => {
 
     expect(amountStakedUser2).to.equal("201756982705500000000000");
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
 
     expect(
       (await stakingPlatform.calculatedReward(addresses[1])).toString()
@@ -651,7 +647,7 @@ describe("StakingPlatform - Restake", () => {
         (await stakingPlatform.calculatedReward(addresses[0])).toString()
       ).to.equal("0");
 
-      await stakingPlatform.withdraw();
+      await stakingPlatform.withdrawAll();
       await stakingPlatform.deposit(n18("1000000"));
       expect(
         (await stakingPlatform.calculatedReward(addresses[0])).toString()
@@ -786,7 +782,7 @@ describe("StakingPlatform - Restake", () => {
       (await stakingPlatform.amountStaked(addresses[7])).toString()
     ).to.equal("1100000000000000000000000");
 
-    await stakingPlatform.connect(accounts[7]).withdraw();
+    await stakingPlatform.connect(accounts[7]).withdrawAll();
 
     expect(
       (await stakingPlatform.amountStaked(addresses[7])).toString()

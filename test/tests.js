@@ -197,8 +197,8 @@ describe("StakingPlatform - PoolTests", () => {
     await stakingPlatform.setPrecision(20);
     await increaseTime(ONE_DAY * 50);
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
 
     await ethers.provider.send("evm_setAutomine", [false]);
 
@@ -247,9 +247,9 @@ describe("StakingPlatform - PoolTests", () => {
   it("Should withdraw after 99 days and re-deposit and farm until endPeriod, withdraw scenario", async () => {
     await increaseTime(ONE_DAY * 99);
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
 
     await ethers.provider.send("evm_setAutomine", [false]);
 
@@ -294,10 +294,10 @@ describe("StakingPlatform - PoolTests", () => {
     const amountStaked3 = await stakingPlatform.amountStaked(addresses[3]);
     const amountStaked4 = await stakingPlatform.amountStaked(addresses[4]);
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
-    await stakingPlatform.connect(accounts[2]).withdraw();
-    await stakingPlatform.connect(accounts[3]).withdraw();
-    await stakingPlatform.connect(accounts[4]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
+    await stakingPlatform.connect(accounts[3]).withdrawAll();
+    await stakingPlatform.connect(accounts[4]).withdrawAll();
 
     expect(await token.balanceOf(addresses[1])).to.equal(
       balanceUser1.add(amountStaked1).add(user1)
@@ -316,9 +316,9 @@ describe("StakingPlatform - PoolTests", () => {
   it("Should withdraw after 99 days and re-deposit and farm until endPeriod, claimRewards scenario", async () => {
     await increaseTime(ONE_DAY * 99);
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
 
     await ethers.provider.send("evm_setAutomine", [false]);
 
@@ -381,10 +381,10 @@ describe("StakingPlatform - PoolTests", () => {
       balanceUser4.add(user4)
     );
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
-    await stakingPlatform.connect(accounts[2]).withdraw();
-    await stakingPlatform.connect(accounts[3]).withdraw();
-    await stakingPlatform.connect(accounts[4]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
+    await stakingPlatform.connect(accounts[3]).withdrawAll();
+    await stakingPlatform.connect(accounts[4]).withdrawAll();
 
     expect(await token.balanceOf(addresses[1])).to.equal(
       balanceUser1.add(amountStaked1).add(user1)
@@ -403,9 +403,9 @@ describe("StakingPlatform - PoolTests", () => {
   it("Should withdraw after 99 and farm until endPeriod (1day)", async () => {
     await increaseTime(ONE_DAY * 99);
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
 
     await ethers.provider.send("evm_setAutomine", [false]);
 
@@ -466,9 +466,9 @@ describe("StakingPlatform - PoolTests", () => {
   it("Should withdraw after 99 and farm half a day and then withdraw before ending", async () => {
     await increaseTime(ONE_DAY * 99);
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
 
     await ethers.provider.send("evm_setAutomine", [false]);
 
@@ -506,13 +506,13 @@ describe("StakingPlatform - PoolTests", () => {
     expect(user3.toString()).to.equal("50000000000000000000");
     expect(user4.toString()).to.equal("50000000000000000000");
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[3]).withdraw();
+    await stakingPlatform.connect(accounts[3]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[4]).withdraw();
+    await stakingPlatform.connect(accounts[4]).withdrawAll();
     await increaseTime(ONE_DAY / 2);
     user1 = await stakingPlatform.rewardOf(addresses[1]);
     user2 = await stakingPlatform.rewardOf(addresses[2]);
@@ -527,9 +527,9 @@ describe("StakingPlatform - PoolTests", () => {
   it("Should test with 0", async () => {
     await increaseTime(ONE_DAY * 99);
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
 
     await token.connect(accounts[1]).approve(stakingPlatform.address, 1);
     await token.connect(accounts[2]).approve(stakingPlatform.address, 1);
@@ -538,16 +538,16 @@ describe("StakingPlatform - PoolTests", () => {
 
     await expect(
       stakingPlatform.connect(accounts[1]).deposit("0")
-    ).to.revertedWith("Amount must be greater than 1E18");
+    ).to.revertedWith("Amount must be greater than 0");
     await expect(
       stakingPlatform.connect(accounts[2]).deposit("0")
-    ).to.revertedWith("Amount must be greater than 1E18");
+    ).to.revertedWith("Amount must be greater than 0");
     await expect(
       stakingPlatform.connect(accounts[3]).deposit("0")
-    ).to.revertedWith("Amount must be greater than 1E18");
+    ).to.revertedWith("Amount must be greater than 0");
     await expect(
       stakingPlatform.connect(accounts[4]).deposit("0")
-    ).to.revertedWith("Amount must be greater than 1E18");
+    ).to.revertedWith("Amount must be greater than 0");
   });
 
   it("Should test with low value", async () => {
@@ -586,9 +586,9 @@ describe("StakingPlatform - PoolTests", () => {
     expect(amountStaked3.toString()).to.equal("1000000000000000000");
     expect(amountStaked4.toString()).to.equal("1000000000000000000");
 
-    await stakingPlatform.connect(accounts[3]).withdraw();
+    await stakingPlatform.connect(accounts[3]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[4]).withdraw();
+    await stakingPlatform.connect(accounts[4]).withdrawAll();
   });
 
   it("Should fail with very low value", async () => {
@@ -601,12 +601,8 @@ describe("StakingPlatform - PoolTests", () => {
       .connect(accounts[4])
       .approve(stakingPlatform.address, 100000000);
 
-    await expect(
-      stakingPlatform.connect(accounts[3]).deposit("1000")
-    ).to.revertedWith("Amount must be greater than 1E18");
-    await expect(
-      stakingPlatform.connect(accounts[4]).deposit("10000")
-    ).to.revertedWith("Amount must be greater than 1E18");
+    await stakingPlatform.connect(accounts[3]).deposit("1000");
+    await stakingPlatform.connect(accounts[4]).deposit("10000");
   });
 
   it("Should withdraw residual if nobody claimedRewards", async () => {
@@ -623,9 +619,9 @@ describe("StakingPlatform - PoolTests", () => {
   it("Should withdraw residual if rewards claimed", async () => {
     await increaseTime(ONE_DAY * 600);
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[2]).withdraw();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
 
     expect(
       (await token.balanceOf(stakingPlatform.address)).toString()
@@ -645,11 +641,11 @@ describe("StakingPlatform - PoolTests", () => {
 
     await increaseTime(ONE_DAY * 600);
 
-    await stakingPlatform.connect(accounts[1]).withdraw();
+    await stakingPlatform.connect(accounts[1]).withdrawAll();
 
-    await stakingPlatform.connect(accounts[2]).withdraw();
-    await stakingPlatform.connect(accounts[3]).withdraw();
-    await stakingPlatform.connect(accounts[4]).withdraw();
+    await stakingPlatform.connect(accounts[2]).withdrawAll();
+    await stakingPlatform.connect(accounts[3]).withdrawAll();
+    await stakingPlatform.connect(accounts[4]).withdrawAll();
 
     expect(
       (await token.balanceOf(stakingPlatform.address)).toString()

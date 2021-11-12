@@ -346,7 +346,6 @@ describe("StakingPlatform - Deep Pool - withdrawal with amount", () => {
   });
 
   it("Should fail claiming tokens", async () => {
-    // await expect(stakingPlatform.claimRewards());
     await expect(stakingPlatform.claimRewards()).to.revertedWith(
       "Nothing to claim"
     );

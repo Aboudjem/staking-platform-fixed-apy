@@ -229,7 +229,7 @@ describe("StakingPlatform - Quick Pool", () => {
   });
 
   it("Should fail withdraw tokens before ending period", async () => {
-    await expect(stakingPlatform.withdraw()).to.revertedWith(
+    await expect(stakingPlatform.withdrawAll()).to.revertedWith(
       "No withdraw until lockup ends"
     );
   });
@@ -243,7 +243,7 @@ describe("StakingPlatform - Quick Pool", () => {
     ).toString();
     expect(userRewards).to.equal("2466210045662100456");
     await expect(
-      stakingPlatform.connect(accounts[7]).withdraw()
+      stakingPlatform.connect(accounts[7]).withdrawAll()
     ).to.revertedWith("No withdraw until lockup ends");
   });
 
@@ -253,7 +253,7 @@ describe("StakingPlatform - Quick Pool", () => {
     let userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
     expect(userRewards).to.equal("446301855022831050228");
 
-    await stakingPlatform.connect(accounts[7]).withdraw();
+    await stakingPlatform.connect(accounts[7]).withdrawAll();
 
     const userBalance = (await token.balanceOf(addresses[7])).toString();
     userRewards = (await stakingPlatform.rewardOf(addresses[7])).toString();
@@ -273,7 +273,7 @@ describe("StakingPlatform - Quick Pool", () => {
     ).toString();
     expect(user7rewards).to.equal("0");
 
-    await stakingPlatform.connect(accounts[7]).withdraw();
+    await stakingPlatform.connect(accounts[7]).withdrawAll();
     user7Balance = (await token.balanceOf(addresses[7])).toString();
 
     expect(user7Balance).to.equal("10446301883561643835616");
@@ -396,7 +396,7 @@ describe("StakingPlatform - Quick Pool", () => {
       "2969999999999999999999"
     );
     for (let i = 0; i <= 8; i++) {
-      await stakingPlatform.connect(accounts[i]).withdraw();
+      await stakingPlatform.connect(accounts[i]).withdrawAll();
     }
 
     expect((await token.balanceOf(addresses[1])).toString()).to.equal(
