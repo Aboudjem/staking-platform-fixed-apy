@@ -119,8 +119,6 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         if (_rewardsToClaim[_msgSender()] > 0) {
             _claimRewards();
         }
-
-        _userStartTime[_msgSender()] = block.timestamp;
         _totalStaked -= amount;
         staked[_msgSender()] -= amount;
         token.safeTransfer(_msgSender(), amount);
