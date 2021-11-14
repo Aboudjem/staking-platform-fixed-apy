@@ -10,7 +10,7 @@ all parameters are immutable
 
 function that start the staking
 
-set `startPeriod` to the current current `block.timestamp`
+set `startPeriod` to the current `block.timestamp`
 set `lockupPeriod` which is `block.timestamp` + `lockupDuration`
 and `endPeriod` which is `startPeriod` + `stakingDuration`
 
@@ -39,7 +39,7 @@ if rewards to claim
 
 function that allows a user to withdraw its initial deposit
 
-must be called only when `block.timestamp` >= `endPeriod`
+must be called only when `block.timestamp` >= `lockupPeriod`
 `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
 withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
 if rewards to claim

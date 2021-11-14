@@ -119,8 +119,6 @@ contract StakingPlatform is IStakingPlatform, Ownable {
         if (_rewardsToClaim[_msgSender()] > 0) {
             _claimRewards();
         }
-
-        _userStartTime[_msgSender()] = block.timestamp;
         _totalStaked -= amount;
         staked[_msgSender()] -= amount;
         token.safeTransfer(_msgSender(), amount);
@@ -130,7 +128,7 @@ contract StakingPlatform is IStakingPlatform, Ownable {
 
     /**
      * @notice function that allows a user to withdraw its initial deposit
-     * @dev must be called only when `block.timestamp` >= `endPeriod`
+     * @dev must be called only when `block.timestamp` >= `lockupPeriod`
      * @dev `block.timestamp` higher than `lockupPeriod` (lockupPeriod finished)
      * withdraw reset all states variable for the `msg.sender` to 0, and claim rewards
      * if rewards to claim
