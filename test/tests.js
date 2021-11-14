@@ -165,8 +165,14 @@ describe("StakingPlatform - PoolTests", () => {
     let user2 = await stakingPlatform.rewardOf(addresses[2]);
     let user3 = await stakingPlatform.rewardOf(addresses[3]);
     let user4 = await stakingPlatform.rewardOf(addresses[4]);
-    expect(user1.toString()).to.equal("5000003472222222222200");
-    expect(user2.toString()).to.equal("5000003472222222222200");
+    expect(user1.toString()).to.be.oneOf([
+      "5000003472222222222200",
+      "5000004629629629629600",
+    ]);
+    expect(user2.toString()).to.be.oneOf([
+      "5000003472222222222200",
+      "5000004629629629629600",
+    ]);
     expect(user3.toString()).to.equal("0");
     expect(user4.toString()).to.equal("0");
     await ethers.provider.send("evm_setAutomine", [true]);
@@ -228,10 +234,22 @@ describe("StakingPlatform - PoolTests", () => {
     user2 = await stakingPlatform.rewardOf(addresses[2]);
     user3 = await stakingPlatform.rewardOf(addresses[3]);
     user4 = await stakingPlatform.rewardOf(addresses[4]);
-    expect(user1.toString()).to.equal("4900000000000000000000");
-    expect(user2.toString()).to.equal("4900000000000000000000");
-    expect(user3.toString()).to.equal("4900000000000000000000");
-    expect(user4.toString()).to.equal("4900000000000000000000");
+    expect(user1.toString()).to.be.oneOf([
+      "4900000000000000000000",
+      "4900001157407407407400",
+    ]);
+    expect(user2.toString()).to.be.oneOf([
+      "4900000000000000000000",
+      "4900001157407407407400",
+    ]);
+    expect(user3.toString()).to.be.oneOf([
+      "4900000000000000000000",
+      "4900001157407407407400",
+    ]);
+    expect(user4.toString()).to.be.oneOf([
+      "4900000000000000000000",
+      "4900001157407407407400",
+    ]);
 
     await increaseTime(ONE_DAY * 49);
     user1 = await stakingPlatform.rewardOf(addresses[1]);
