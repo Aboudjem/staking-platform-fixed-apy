@@ -234,11 +234,22 @@ describe("StakingPlatform - PoolTests", () => {
     user2 = await stakingPlatform.rewardOf(addresses[2]);
     user3 = await stakingPlatform.rewardOf(addresses[3]);
     user4 = await stakingPlatform.rewardOf(addresses[4]);
-    expect(user1.toString()).to.be.oneOf(["4900000000000000000000", "4900001157407407407400"]);
-    expect(user2.toString()).to.be.oneOf(["4900000000000000000000", "4900001157407407407400"]);
-    expect(user3.toString()).to.be.oneOf(["4900000000000000000000", "4900001157407407407400"]);
-    expect(user4.toString()).to.be.oneOf(["4900000000000000000000", "4900001157407407407400"]);
-
+    expect(user1.toString()).to.be.oneOf([
+      "4900000000000000000000",
+      "4900001157407407407400",
+    ]);
+    expect(user2.toString()).to.be.oneOf([
+      "4900000000000000000000",
+      "4900001157407407407400",
+    ]);
+    expect(user3.toString()).to.be.oneOf([
+      "4900000000000000000000",
+      "4900001157407407407400",
+    ]);
+    expect(user4.toString()).to.be.oneOf([
+      "4900000000000000000000",
+      "4900001157407407407400",
+    ]);
 
     await increaseTime(ONE_DAY * 49);
     user1 = await stakingPlatform.rewardOf(addresses[1]);
